@@ -1,18 +1,18 @@
-const Caterer = require('../models/catererModal');
+const Decorator = require('../models/decoratorModal');
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
 
-exports.getAllCaterer = catchAsync(async (req, res, next) => {
+exports.getAllDecorator = catchAsync(async (req, res, next) => {
     const { query } = req;
     const { filters, sort } = buildFiltersAndSort(query);
 
     // Fetch banquet data based on filters and sorting
-    const caterer = await Caterer.find(filters).sort(sort);
+    const decorator = await Decorator.find(filters).sort(sort);
 
     // If banquet data is successfully fetched, return success response
     res.status(200).json({
       message: 'success',
-      length: caterer.length,
-      data: caterer,
+      length: decorator.length,
+      data: decorator,
     });
 })

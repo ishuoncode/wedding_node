@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModal');
 const AppError = require('./../utils/appError');
 const catchAsync = require('./../utils/catchAsync');
+const { promisify } = require('util');
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -133,4 +134,16 @@ exports.isLoggedIn = async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({ message: 'Internal Server Error' });
   }
+};
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403),
+      );
+    }
+
+    next();
+  };
 };

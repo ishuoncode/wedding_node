@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-const Review =  require("./review");
+const { Schema } = mongoose;
+// const Review =  require("./review");
+// const User = require('./userModal');
 
-const decoratorSchema = new mongoose.Schema({
+const decoratorSchema = new Schema({
   name: {
     type: String,
     lowercase: true,
@@ -28,13 +30,13 @@ const decoratorSchema = new mongoose.Schema({
   like: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'User', 
     },
   ],
   contactUs: Number,
   yearOfEstd: Number,
 
-  reviews: [Review.schema],
+  // reviews: [Review.schema],
   billboard: {
     type: String,
     maxlength: 255,

@@ -111,15 +111,15 @@ const userSchema = new mongoose.Schema({
   draft: {
     personalInfo: {
       type: personalInfoSchema,
-      required: true,
+      // required: true,
     },
     importantInfo: {
       type: importantInfoSchema,
-      required: true,
+      // required: true,
     },
     governmentInfo: {
       type: governmentInfoSchema,
-      required: true,
+      // required: true,
     },
   },
   googleLogIn: {
