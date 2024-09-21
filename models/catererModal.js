@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose; 
+const Review =  require("./review");
 
 const catererSchema = new Schema({
   name: {
@@ -22,6 +23,7 @@ const catererSchema = new Schema({
     min: 1,
     max: 5,
   },
+  reviews: [Review.schema],
   price: {
     type: [Number],
     default: [],

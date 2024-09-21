@@ -1,15 +1,20 @@
-const express = require('express');
-const authController = require('../controllers/authController.js');
-const photographerController = require('../controllers/photographerController.js');
-
+const express = require("express");
+const authController = require("../controllers/authController.js");
+const photographerController = require("../controllers/photographerController.js");
 
 const router = express.Router();
 
 router
-  .route('/')
-  .get(
+  .route("/")
+  .get( photographerController.getAllPhotographer);
+
+router
+  .route("/:id")
+  .get( photographerController.getPhotographer)
+  .delete(
     authController.protect,
-    photographerController.getAllPhotographer,
-  )
+    authController.restrictTo("admin"),
+    photographerController.deletePhotographer
+  );
 
 module.exports = router;

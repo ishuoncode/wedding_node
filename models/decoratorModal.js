@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-// const Review =  require("./review");
+const Review =  require("./review");
 // const User = require('./userModal');
 
 const decoratorSchema = new Schema({
@@ -36,7 +36,7 @@ const decoratorSchema = new Schema({
   contactUs: Number,
   yearOfEstd: Number,
 
-  // reviews: [Review.schema],
+  reviews: [Review.schema],
   billboard: {
     type: String,
     maxlength: 255,

@@ -105,7 +105,8 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.isLoggedIn = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
+    console.log(req.headers,"headers")
+    const token = req.headers.authorization.replace('Bearer ', '');
     if (!token) {
       return res.status(401).json({
         isAuthorized: false,

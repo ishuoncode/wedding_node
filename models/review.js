@@ -1,7 +1,7 @@
 
 const mongoose = require('mongoose');
-
-const reviewSchema = new mongoose.Schema({
+const { Schema } = mongoose;
+const reviewSchema = new Schema({
     content: {
         type: String,
         required: [true, 'Review content cannot be blank']

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose; 
+const Review =  require("./review");
 
 
 const banquetSchema = new Schema({
@@ -91,7 +92,7 @@ const banquetSchema = new Schema({
       message: 'At least one availability is required',
     },
   },
-  // reviews: [Review.schema], // Uncomment this if you have a Review model/schema
+  reviews: [Review.schema], // Uncomment this if you have a Review model/schema
   billboard: {
     type: String,
     maxlength: 255,

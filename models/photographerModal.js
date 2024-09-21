@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-// const Review = require('./review'); 
+const Review = require('./review'); 
 
 const photographerSchema = new Schema({
   name: {
@@ -43,7 +43,7 @@ const photographerSchema = new Schema({
   contactUs: Number,
   yearOfEstd: Number,
   services: [String],
-  // reviews: [Review.schema], // Using Review schema as a sub-document
+  reviews: [Review.schema], // Using Review schema as a sub-document
   billboard: {
     type: String,
     maxlength: 255,
