@@ -71,11 +71,18 @@ const governmentInfoSchema = new mongoose.Schema({
     pancard: {
       type: String,
       required: true,
+      minlength: 10,
+      maxlength: 10, 
+      uppercase: true,
     },
    
     document: {
       type: String, 
-      required: true,
+    },
+    allowed: {
+      type: [String], // Array of strings
+      required: true, // You can make this required if needed
+      // enum: ['Banquet', 'Caterer', 'Photographer', 'Decorator'], // Ensure only valid options are stored
     },
   });
 
@@ -86,7 +93,12 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Email is required!'],
     match: [/.+\@.+\..+/, 'Please use a valid email address'],
   },
-
+  phoneNumber: {
+    type: String,
+    trim: true, // Trims any leading/trailing whitespace
+    
+    required: [true, 'Phone number is required'], 
+  },
   password: {
     type: String,
     required: [true, 'Please provide a password'],

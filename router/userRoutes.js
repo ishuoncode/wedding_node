@@ -6,9 +6,15 @@ const router = express.Router();
 
 router.post("/login", authController.login);
 router.post("/signup", authController.signup);
-router.get("/verify",authController.isLoggedIn)
-router.post("/uploadPhoto",userController.presigned)
-router.patch("/image/:id",authController.protect,userController.addProfileImage)
+router.get("/verify", authController.isLoggedIn);
+router.post("/uploadPhoto", userController.presigned);
+router.post("/uploadDocs", userController.presignedDocs);
+
+router.patch(
+  "/image/:id",
+  authController.protect,
+  userController.addProfileImage
+);
 
 router
   .route("/")
@@ -20,11 +26,24 @@ router
 
 router
   .route("/:id")
-  .get(authController.protect,authController.restrictTo('admin'), userController.getMe)
+  .get(
+    authController.protect,
+    authController.restrictTo("admin"),
+    userController.getMe
+  )
   .delete(
     authController.protect,
     authController.restrictTo("admin"),
     userController.deleteUser
-  );
+  )
+  .patch(authController.protect, userController.updateUser);
+
+router
+  .route("/:id/sellerdraft")
+  .patch(authController.protect, userController.sellerDraft);
+
+router
+  .route("/:id/sellerdraft/documentupdate")
+  .patch(authController.protect, userController.documentUpdate);
 
 module.exports = router;

@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-
-const sellerSchema = new mongoose.Schema({
+// Define the seller schema
+const sellerSchema = new Schema({
   firstName: { type: String, required: true },
   middleName: { type: String },
   lastName: { type: String, required: true },
   phoneNumber: String,
   email: {
     type: String,
-    unique: [true, 'Email already exists!'],
+    unique: true, // Corrected this to a boolean
     required: [true, 'Email is required!'],
     match: [/.+\@.+\..+/, 'Please use a valid email address'],
   },
@@ -31,7 +32,7 @@ const sellerSchema = new mongoose.Schema({
 
   userid: {
     type: Schema.Types.ObjectId,
-    ref: User,
+    ref: 'User', // Corrected the ref to be a string
     required: true,
     unique: true,
   },
@@ -67,5 +68,7 @@ const sellerSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Create the Seller model
 const Seller = mongoose.model('Seller', sellerSchema);
+
 module.exports = Seller;

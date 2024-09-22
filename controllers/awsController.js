@@ -31,5 +31,21 @@
     return s3.getSignedUrlPromise('putObject', params); // Using getSignedUrlPromise for better Promise handling
   };
   
-  module.exports = { s3, generatePresignedUrl };
+  /**
+ * Function to delete a file from S3
+ * @param {string} Key - The file key (filename) to delete from the S3 bucket
+ * @param {string} Bucket - The name of the S3 bucket
+ * @returns {Promise} - Resolves if the deletion is successful
+ */
+const deleteFile = async (Key, Bucket = process.env.AWS_S3_BUCKET_NAME) => {
+    const params = {
+      Bucket,
+      Key,
+    };
+  
+    return s3.deleteObject(params).promise(); // Using promise for async deletion
+  };
+  
+  
+  module.exports = { s3, generatePresignedUrl,deleteFile  };
   
