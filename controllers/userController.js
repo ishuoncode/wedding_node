@@ -1,4 +1,5 @@
 const User = require("../models/userModal");
+const Seller = require("../models/sellerModal");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const { generatePresignedUrl, deleteFile } = require("./awsController");
@@ -335,3 +336,83 @@ exports.documentUpdate = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.sellerRequest = catchAsync(async (req, res, next) => {
+  // Fetch user by ID
+  console.log("SdsdsdfsfS")
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 404 });
+  }
+
+  // Destructure personal, important, and government information
+  const {
+    firstName,
+    middleName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    pincode,
+    city,
+    state,
+    whatsappNumber,
+  } = user.draft?.personalInfo || {};
+
+  const {
+    GSTNO,
+    bank = { name: undefined, account: undefined, reenterAccount: undefined, ifsc: undefined, holdername: undefined },
+  } = user.draft?.importantInfo || {};
+
+  const {
+    pancard,
+    document,
+    allowed,
+  } = user.draft?.governmentInfo || {};
+
+  // Prepare the data for the Seller model
+  const sellerData = {
+    firstName,
+    middleName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    pincode,
+    city,
+    state,
+    whatsappNumber,
+    GSTNO,
+    bank: {
+      name: bank.name,
+      account: bank.account,
+      reenterAccount: bank.reenterAccount,
+      ifsc: bank.ifsc,
+      holdername: bank.holdername,
+    },
+    pancard,
+    document,
+    allowed,
+    userid: req.params.id,
+  };
+
+  // Create the seller record
+  const seller = await Seller.create(sellerData);
+
+  if (!seller) {
+    return next(new AppError("Error creating seller record", 500));
+  }
+
+  console.log(seller, "seller");
+
+  // Update user status and save in one go
+  user.sellerRequest = "pending";
+  await user.save();
+
+  // Send response
+  res.status(200).json({
+    status: "success",
+    message: "Seller request created successfully",
+    data: seller,
+  });
+});

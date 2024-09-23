@@ -10,6 +10,7 @@ router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
 
+
 router.patch(
   "/image/:id",
   authController.protect,
@@ -45,5 +46,11 @@ router
 router
   .route("/:id/sellerdraft/documentupdate")
   .patch(authController.protect, userController.documentUpdate);
+
+  router
+  .route("/:id/sellerRequest")
+  .get(authController.protect, userController.sellerRequest);
+
+
 
 module.exports = router;

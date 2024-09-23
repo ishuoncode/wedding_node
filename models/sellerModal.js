@@ -29,6 +29,11 @@ const sellerSchema = new Schema({
 
   pancard: String,
   document: String,
+  allowed: {
+    type: [String], // Array of strings
+    required: true, // You can make this required if needed
+    // enum: ['Banquet', 'Caterer', 'Photographer', 'Decorator'], // Ensure only valid options are stored
+  },
 
   userid: {
     type: Schema.Types.ObjectId,
