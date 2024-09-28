@@ -45,3 +45,49 @@ exports.deleteBanquet = catchAsync(async (req, res, next) => {
     });
   });
   
+
+   
+
+exports.createBanquet = catchAsync(async (req, res, next) => {
+  const {
+    name,
+    location,
+    services,
+    description,
+    price,
+    capacity,
+    specialFeature,
+    yearOfEstd,
+    availability,
+    openHours,
+    operatingDays,
+    type,
+    billboard,
+  } = req.body;
+
+  // Create new banquet entry
+  const newBanquet = await Banquet.create({
+    name,
+    location,
+    services,
+    description,
+    price,
+    capacity,
+    specialFeature,
+    yearOfEstd,
+    availability,
+    openHours,
+    operatingDays,
+    type,
+    billboard,
+  });
+
+  // Send response
+  res.status(201).json({
+    status: 'success',
+    data: {
+      banquet: newBanquet,
+    },
+  });
+});
+

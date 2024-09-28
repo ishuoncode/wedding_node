@@ -1,51 +1,8 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose; 
-const Review =  require("./review");
+const { Schema } = mongoose;
+const Review = require("./review");
 
-const catererSchema = new Schema({
-  name: {
-    type: String,
-    lowercase: true,
-    required: [true, "Name is required!"],
-    maxlength: 40,
-  },
-  description: String,
-  rating: {
-    type: Number,
-    required: true,
-    default: 4.5,
-    min: 1,
-    max: 5,
-  },
-  adminRating: {
-    type: Number,
-    select: false,
-    min: 1,
-    max: 5,
-  },
-  reviews: [Review.schema],
-  price: {
-    type: [Number],
-    default: [],
-  },
-  like: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
-  contactUs: Number,
-  yearOfEstd: Number,
-  billboard: {
-    type: String,
-    maxlength: 255,
-  },
-
-  photos: {
-    type: [String],
-    default: [],
-  },
-
+const sectionSchema = new Schema({
   veg: {
     starter: [String],
     maincourse: [String],
@@ -70,6 +27,53 @@ const catererSchema = new Schema({
     breads: [{ name: String, price: String }],
     rice: [{ name: String, price: String }],
   },
+  price: {
+    type: [Number],
+    default: [],
+  },
+});
+
+const catererSchema = new Schema({
+  name: {
+    type: String,
+    lowercase: true,
+    required: [true, "Name is required!"],
+    maxlength: 40,
+  },
+  description: String,
+  rating: {
+    type: Number,
+    required: true,
+    default: 4.5,
+    min: 1,
+    max: 5,
+  },
+  adminRating: {
+    type: Number,
+    select: false,
+    min: 1,
+    max: 5,
+  },
+  reviews: [Review.schema],
+  like: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  contactUs: Number,
+  yearOfEstd: Number,
+  billboard: {
+    type: String,
+    maxlength: 255,
+  },
+  photos: {
+    type: [String],
+    default: [],
+  },
+  basic: sectionSchema,    
+  standard: sectionSchema, 
+  deluxe: sectionSchema,  
 });
 
 const Caterer = mongoose.model("Caterer", catererSchema);

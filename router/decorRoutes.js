@@ -6,11 +6,16 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(decoratorController.getAllDecorator);
+  .get(decoratorController.getAllDecorator)
+  .post(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    decoratorController.createDecorator
+  );
 
 router
   .route("/:id")
-  .get( decoratorController.getDecorator)
+  .get(decoratorController.getDecorator)
   .delete(
     authController.protect,
     authController.restrictTo("admin"),

@@ -4,11 +4,18 @@ const catererController = require("../controllers/catererController.js");
 
 const router = express.Router();
 
-router.route("/").get( catererController.getAllCaterer);
+router
+  .route("/")
+  .get(catererController.getAllCaterer)
+  .post(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    catererController.createCaterer
+  );
 
 router
   .route("/:id")
-  .get( catererController.getCaterer)
+  .get(catererController.getCaterer)
   .delete(
     authController.protect,
     authController.restrictTo("admin"),

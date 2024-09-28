@@ -43,3 +43,32 @@ exports.deleteDecorator = catchAsync(async (req, res, next) => {
       data: null,
     });
   });
+
+  exports.createDecorator = catchAsync(async (req, res, next) => {
+    const {
+      name,
+      innerdescription,
+      outerdescription,
+      location,
+      price,
+      yearOfEstd
+    } = req.body;
+  
+    // Create a new decorator entry in the database
+    const newDecorator = await Decorator.create({
+      name,
+      innerdescription,
+      outerdescription,
+      location,
+      price,
+      yearOfEstd
+    });
+  
+    // Send back a response with the newly created decorator
+    res.status(201).json({
+      status: 'success',
+      data: {
+        decorator: newDecorator,
+      },
+    });
+  })

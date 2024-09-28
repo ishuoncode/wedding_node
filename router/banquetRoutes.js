@@ -4,7 +4,14 @@ const banquetController = require("../controllers/banquetController.js");
 
 const router = express.Router();
 
-router.route("/").get( banquetController.getAllBanquet);
+router
+  .route("/")
+  .get(banquetController.getAllBanquet)
+  .post(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    banquetController.createBanquet
+  );
 
 router
   .route("/:id")

@@ -43,3 +43,37 @@ exports.deleteCaterer = catchAsync(async (req, res, next) => {
       data: null,
     });
   });
+
+  exports.createCaterer = catchAsync(async (req, res, next) => {
+    // Destructure the request body
+    const {
+      name,
+      description,
+      yearOfEstd,
+      billboard,
+      photos,
+      basic,
+      standard,
+      deluxe,
+    } = req.body;
+  
+    // Create a new caterer instance
+    const newCaterer = await Caterer.create({
+      name,
+      description,
+      yearOfEstd,
+      billboard,
+      photos,
+      basic,
+      standard,
+      deluxe,
+    });
+  
+    // Respond with the newly created caterer
+    res.status(201).json({
+      status: 'success',
+      data: {
+        caterer: newCaterer,
+      },
+    });
+  });

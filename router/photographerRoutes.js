@@ -6,11 +6,16 @@ const router = express.Router();
 
 router
   .route("/")
-  .get( photographerController.getAllPhotographer);
+  .get(photographerController.getAllPhotographer)
+  .post(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    photographerController.createPhotographer
+  );
 
 router
   .route("/:id")
-  .get( photographerController.getPhotographer)
+  .get(photographerController.getPhotographer)
   .delete(
     authController.protect,
     authController.restrictTo("admin"),

@@ -42,13 +42,18 @@ exports.updateStatus = catchAsync(async (req, res, next) => {
 
   // Determine the sellerRequest status based on the condition
   const sellerRequestStatus = status === "Accepted" ? "accepted" : "none";
+  const role = status === "Accepted" ? "seller" : "user";
 
   // Update user's sellerRequest status
   const user = await User.findByIdAndUpdate(
     seller.userid,
-    { sellerRequest: sellerRequestStatus },
+    { sellerRequest: sellerRequestStatus,role },
     { new: true, runValidators: true }
   );
+
+  if (!user) {
+    return next(new AppError('No user found with that ID', 404));
+  }
 
   res.status(200).json({
     status: 'success',

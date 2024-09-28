@@ -43,3 +43,36 @@ exports.deletePhotographer = catchAsync(async (req, res, next) => {
       data: null,
     });
   });
+
+  exports.createPhotographer = catchAsync(async (req, res, next) => {
+    const {
+      name,
+      innerdescription,
+      outerdescription,
+      location,
+      price,
+      yearOfEstd,
+      services,
+      occasion
+    } = req.body;
+  
+    // Create a new photographer entry in the database
+    const newPhotographer = await Photographer.create({
+      name,
+      innerdescription,
+      outerdescription,
+      location,
+      price,
+      yearOfEstd,
+      services,
+      occasion
+    });
+  
+    // Send back a response with the newly created photographer
+    res.status(201).json({
+      status: 'success',
+      data: {
+        photographer: newPhotographer,
+      },
+    });
+  });
