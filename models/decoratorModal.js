@@ -46,6 +46,12 @@ const decoratorSchema = new Schema({
     type: [String],
     default: [],
   },
+  gallery: [
+    {
+      name: String,
+      photos: [String],
+    },
+  ],
 });
 
 const Decorator = mongoose.model('Decorator', decoratorSchema);

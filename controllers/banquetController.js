@@ -93,111 +93,111 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
 });
 
 
-exports.addNewFolder = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const { name } = req.body;
-  console.log('Uploaded files:', req.files);
+// exports.addNewFolder = catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+//   const { name } = req.body;
+//   console.log('Uploaded files:', req.files);
 
-  if (!name) {
-    return next(new AppError('New gallery folder must have a name', 400));
-  }
+//   if (!name) {
+//     return next(new AppError('New gallery folder must have a name', 400));
+//   }
 
-  // Find the banquet by ID
-  const banquet = await Banquet.findById(id);
-  if (!banquet) {
-    return next(new AppError('No banquet found with that ID', 404));
-  }
+//   // Find the banquet by ID
+//   const banquet = await Banquet.findById(id);
+//   if (!banquet) {
+//     return next(new AppError('No banquet found with that ID', 404));
+//   }
 
-  // Ensure there are files uploaded
-  if (!req.files || !req.files['photos[]'] || req.files['photos[]'].length === 0) {
-    return next(new AppError('You must upload at least one photo', 400));
-  }
+//   // Ensure there are files uploaded
+//   if (!req.files || !req.files['photos[]'] || req.files['photos[]'].length === 0) {
+//     return next(new AppError('You must upload at least one photo', 400));
+//   }
 
-  // Prepare files for uploading to S3
-  const files = req.files['photos[]'].map(file => ({
-    filename: `banquet-${id}-${file.originalname}`, // Keep the original file name
-    buffer: file.buffer, // Buffer data
-    ContentType: file.mimetype // Content type
-  }));
+//   // Prepare files for uploading to S3
+//   const files = req.files['photos[]'].map(file => ({
+//     filename: `banquet-${id}-${file.originalname}`, // Keep the original file name
+//     buffer: file.buffer, // Buffer data
+//     ContentType: file.mimetype // Content type
+//   }));
 
-  // Upload files to S3
-  const photoUrls = await uploadMultipleFiles(files,`dream-wedding/images/banquet/media/${id}`);
+//   // Upload files to S3
+//   const photoUrls = await uploadMultipleFiles(files,`dream-wedding/images/banquet/media/${id}`);
 
-  // Create a new gallery folder object with S3 URLs
-  const newGalleryFolder = {
-    name,
-    photos: photoUrls, // Use the URLs returned from S3
-  };
+//   // Create a new gallery folder object with S3 URLs
+//   const newGalleryFolder = {
+//     name,
+//     photos: photoUrls, // Use the URLs returned from S3
+//   };
 
-  // Add the new gallery folder to the banquet
-  banquet.gallery.push(newGalleryFolder);
+//   // Add the new gallery folder to the banquet
+//   banquet.gallery.push(newGalleryFolder);
 
-  // Save the updated banquet
-  const updatedBanquet = await banquet.save({ validateBeforeSave: true });
+//   // Save the updated banquet
+//   const updatedBanquet = await banquet.save({ validateBeforeSave: true });
 
-  // Respond with the updated banquet
-  res.status(201).json({
-    status: 'success',
-    data: {
-      banquet: updatedBanquet,
-    },
-  });
-});
+//   // Respond with the updated banquet
+//   res.status(201).json({
+//     status: 'success',
+//     data: {
+//       banquet: updatedBanquet,
+//     },
+//   });
+// });
 
 
-exports.patchFolder = catchAsync(async (req, res, next) => {
-  const { id, folderid } = req.params;
-  const { deleteImageArray } = req.body; // Extract deleteImageArray from request body
+// exports.patchFolder = catchAsync(async (req, res, next) => {
+//   const { id, folderid } = req.params;
+//   const { deleteImageArray } = req.body; // Extract deleteImageArray from request body
 
-  const banquet = await Banquet.findById(id);
+//   const banquet = await Banquet.findById(id);
 
-  if (!banquet) {
-    return new NextResponse("Banquet not found", { status: 404 });
-  }
+//   if (!banquet) {
+//     return new NextResponse("Banquet not found", { status: 404 });
+//   }
   
-  // Find the gallery in one go and check if it exists
-  const gallery = banquet.gallery.find((item) => item._id.toString() === folderid);
+//   // Find the gallery in one go and check if it exists
+//   const gallery = banquet.gallery.find((item) => item._id.toString() === folderid);
   
-  if (!gallery) {
-    return new NextResponse("Gallery not found", { status: 404 });
-  }
-  const extractPart = (array) => {
-    return array.map(url => {
-      // Extract the part after the first occurrence of ".com/"
-      const key = url.split('.com/')[1];
-      return key ? key : ''; // Return the extracted key or an empty string if not found
-    });
-  };
+//   if (!gallery) {
+//     return new NextResponse("Gallery not found", { status: 404 });
+//   }
+//   const extractPart = (array) => {
+//     return array.map(url => {
+//       // Extract the part after the first occurrence of ".com/"
+//       const key = url.split('.com/')[1];
+//       return key ? key : ''; // Return the extracted key or an empty string if not found
+//     });
+//   };
   
-  const DeleteFolderImages = extractPart(deleteImageArray);
-  console.log(DeleteFolderImages, "Ssfsfsf");
+//   const DeleteFolderImages = extractPart(deleteImageArray);
+//   console.log(DeleteFolderImages, "Ssfsfsf");
 
-  if (DeleteFolderImages && DeleteFolderImages.length > 0) {
+//   if (DeleteFolderImages && DeleteFolderImages.length > 0) {
     
-    await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Only pass the key prefix, not the bucket name
+//     await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Only pass the key prefix, not the bucket name
    
-    gallery.photos = gallery.photos.filter(photo => !deleteImageArray.includes(photo));
-  }
+//     gallery.photos = gallery.photos.filter(photo => !deleteImageArray.includes(photo));
+//   }
 
-  // Step 1: Upload new images to S3
-  if (req.files && req.files['addImagesArray[]']) {
-    const files = req.files['addImagesArray[]'].map((file) => ({
-      filename: `banquet-${id}-${file.originalname}`, // Use the original name of the file
-      buffer: file.buffer, // The buffer containing file data
-      ContentType: file.mimetype, // Content type of the file
-    }));
+//   // Step 1: Upload new images to S3
+//   if (req.files && req.files['addImagesArray[]']) {
+//     const files = req.files['addImagesArray[]'].map((file) => ({
+//       filename: `banquet-${id}-${file.originalname}`, // Use the original name of the file
+//       buffer: file.buffer, // The buffer containing file data
+//       ContentType: file.mimetype, // Content type of the file
+//     }));
 
-    // Upload files and get the uploaded URLs
-    const uploadedUrls = await uploadMultipleFiles(files, `dream-wedding/images/banquet/media/${id}`); // Use the correct path for the object key
-    console.log(uploadedUrls,"upoaded urls")
-    gallery.photos.push(...uploadedUrls);
-  }
+//     // Upload files and get the uploaded URLs
+//     const uploadedUrls = await uploadMultipleFiles(files, `dream-wedding/images/banquet/media/${id}`); // Use the correct path for the object key
+//     console.log(uploadedUrls,"upoaded urls")
+//     gallery.photos.push(...uploadedUrls);
+//   }
 
-  await banquet.save();
-  res.status(200).json({
-    status: "success",
-    data: {
-      banquet,
-    },
-  });
-});
+//   await banquet.save();
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       banquet,
+//     },
+//   });
+// });

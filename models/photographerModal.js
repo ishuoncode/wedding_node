@@ -54,10 +54,7 @@ const photographerSchema = new Schema({
   },
   gallery: [
     {
-      name: {
-        type: String,
-        required: true,
-      },
+      name: String,
       photos: [String],
     },
   ],
