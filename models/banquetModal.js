@@ -18,7 +18,7 @@ const banquetSchema = new Schema({
   },
   rating: {
     type: Number,
-    required: true,
+    // required: true,
     default: 4.5,
     min: 1,
     max: 5,

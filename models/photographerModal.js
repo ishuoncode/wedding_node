@@ -11,7 +11,6 @@ const photographerSchema = new Schema({
   },
   rating: {
     type: Number,
-    required: true,
     default: 4.5,
     min: 1,
     max: 5,
