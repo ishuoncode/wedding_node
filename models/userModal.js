@@ -136,14 +136,28 @@ const userSchema = new mongoose.Schema({
     },
   },
   post: {
-    Banquet: [{ type: Schema.Types.ObjectId, ref: "Banquet",    unique: true, }],
-    Decorator: [{ type: Schema.Types.ObjectId, ref: "Decorator",    unique: true, }],
-    Caterer: [{ type: Schema.Types.ObjectId, ref: "Caterer",    unique: true, }],
-    Photographer: [{ type: Schema.Types.ObjectId, ref: "Photographer",    unique: true, }],
+    Banquet: [{ type: Schema.Types.ObjectId, ref: "Banquet", unique: true }],
+    Decorator: [
+      { type: Schema.Types.ObjectId, ref: "Decorator", unique: true },
+    ],
+    Caterer: [{ type: Schema.Types.ObjectId, ref: "Caterer", unique: true }],
+    Photographer: [
+      { type: Schema.Types.ObjectId, ref: "Photographer", unique: true },
+    ],
+  },
+  wishlist: {
+    Banquet: [{ type: Schema.Types.ObjectId, ref: "Banquet", unique: true }],
+    Decorator: [
+      { type: Schema.Types.ObjectId, ref: "Decorator", unique: true },
+    ],
+    Caterer: [{ type: Schema.Types.ObjectId, ref: "Caterer", unique: true }],
+    Photographer: [
+      { type: Schema.Types.ObjectId, ref: "Photographer", unique: true },
+    ],
   },
   sellerid: {
     type: Schema.Types.ObjectId,
-    ref: 'Seller', // Corrected the ref to be a string
+    ref: "Seller", // Corrected the ref to be a string
     unique: true,
   },
   googleLogIn: {

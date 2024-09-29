@@ -5,6 +5,7 @@
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const { uploadMultipleFiles, deleteMultipleFiles } = require("./awsController");
+const User = require("../models/userModal");
 
 const models = {
   Banquet: require("../models/banquetModal"),
@@ -145,25 +146,25 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
   }
 
   if (deleteImageArray && deleteImageArray.length > 0) {
-  // Extract S3 keys from deleteImageArray (URLs)
-  const extractPart = (array) => {
-    return array.map((url) => {
-      const key = decodeURIComponent(url.split('.com/')[1]); // Extract the part after ".com/"
-      return key ? key : ""; // Return the extracted key or an empty string if not found
-    });
-  };
+    // Extract S3 keys from deleteImageArray (URLs)
+    const extractPart = (array) => {
+      return array.map((url) => {
+        const key = decodeURIComponent(url.split(".com/")[1]); // Extract the part after ".com/"
+        return key ? key : ""; // Return the extracted key or an empty string if not found
+      });
+    };
 
-  const DeleteFolderImages = extractPart(deleteImageArray);
-  console.log(DeleteFolderImages, "Images to delete");
+    const DeleteFolderImages = extractPart(deleteImageArray);
+    console.log(DeleteFolderImages, "Images to delete");
 
-  // Delete images from S3 if needed
-  if (DeleteFolderImages && DeleteFolderImages.length > 0) {
-    await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Pass only the key prefix
-    // Remove deleted images from the gallery photos array
-    gallery.photos = gallery.photos.filter(
-      (photo) => !deleteImageArray.includes(photo)
-    );
-  }
+    // Delete images from S3 if needed
+    if (DeleteFolderImages && DeleteFolderImages.length > 0) {
+      await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Pass only the key prefix
+      // Remove deleted images from the gallery photos array
+      gallery.photos = gallery.photos.filter(
+        (photo) => !deleteImageArray.includes(photo)
+      );
+    }
   }
   // Upload new images if provided
   if (req.files && req.files["addImagesArray[]"]) {
@@ -192,6 +193,71 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       [category.toLowerCase()]: entity, // Return the correct entity name dynamically
+    },
+  });
+});
+
+exports.addWishlist = catchAsync(async (req, res, next) => {
+  // console.log("sdjskdjskdjdksdjksdjkjdsdksdksdssd");
+  // console.log(req.user._id,"id")
+  const id = req.user._id.toString();
+  const { itemId, category } = req.body;
+
+
+
+  const validCategories = ["Banquet", "Caterer", "Photographer", "Decorator"]; // Ensure category matches lowercase
+  if (!validCategories.includes(category)) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "Invalid category" });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    id,
+    { $addToSet: { [`wishlist.${category}`]: itemId } }, // Use $addToSet to avoid duplicates
+    { new: true, runValidators: true } // Ensure validation runs
+  );
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
+exports.removeWishlist = catchAsync(async (req, res, next) => {
+  const id = req.user._id.toString(); // Get the user's ID
+  const { itemId, category } = req.body; // Extract itemId and category from the request body
+
+  const validCategories = ["Banquet", "Caterer", "Photographer", "Decorator"]; // Define valid categories
+
+  // Check if the provided category is valid
+  if (!validCategories.includes(category)) {
+    return res
+      .status(400)
+      .json({ status: "error", message: "Invalid category" });
+  }
+
+  // Update the user's wishlist to remove the specified item
+  const user = await User.findByIdAndUpdate(
+    id,
+    { $pull: { [`wishlist.${category}`]: itemId } }, // Use $pull to remove the item
+    { new: true, runValidators: true } // Ensure validation runs
+  );
+
+  // Check if the user was found and updated
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+
+  // Return the updated user data
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
     },
   });
 });

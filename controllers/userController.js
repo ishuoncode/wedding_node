@@ -430,3 +430,40 @@ exports.sellerRequest = catchAsync(async (req, res, next) => {
     data: seller,
   });
 });
+
+
+exports.getWishlist = catchAsync(async (req, res, next) => {
+  const id = req.user._id.toString(); // Get the user's ID
+
+  // Find the user and populate the wishlist fields with corresponding data
+  const user = await User.findById(id)
+    .populate({
+      path: 'wishlist.Banquet',
+      select: 'name location services description price capacity', // Select relevant fields from the Banquet model
+    })
+    .populate({
+      path: 'wishlist.Caterer',
+      select: 'name price services description', // Select relevant fields from the Caterer model
+    })
+    .populate({
+      path: 'wishlist.Photographer',
+      select: 'name services price', // Select relevant fields from the Photographer model
+    })
+    .populate({
+      path: 'wishlist.Decorator',
+      select: 'name outerdescription innerdescription price', // Select relevant fields from the Decorator model
+    });
+
+  // Check if the user exists
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+
+  // Return the user's wishlist
+  res.status(200).json({
+    status: "success",
+    data: {
+      wishlist: user.wishlist,
+    },
+  });
+});
