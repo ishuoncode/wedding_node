@@ -2,7 +2,8 @@ const Banquet = require('../models/banquetModal');
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
 const AppError  = require("../utils/appError")
-const {uploadMultipleFiles,deleteMultipleFiles }=require("./awsController")
+const {uploadMultipleFiles,deleteMultipleFiles }=require("./awsController");
+const User = require('../models/userModal');
 
 
 const extractPart = (array) => array.map(url => url.split("/").pop());
@@ -50,6 +51,8 @@ exports.deleteBanquet = catchAsync(async (req, res, next) => {
   });
   
 exports.createBanquet = catchAsync(async (req, res, next) => {
+  // const {user}=req.user
+  // console.log(req.user)
   const {
     name,
     location,
@@ -83,6 +86,12 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     billboard,
   });
 
+ 
+  await User.findByIdAndUpdate(
+    req.user._id, 
+    { $push: { 'post.Banquet': { $each: [newBanquet._id], $position: 0 } } }, 
+    { new: true } // Return the updated document
+  );
   // Send response
   res.status(201).json({
     status: 'success',

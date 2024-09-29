@@ -1,7 +1,8 @@
 const Decorator = require('../models/decoratorModal');
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
-const AppError  = require("../utils/appError")
+const AppError  = require("../utils/appError");
+const User = require('../models/userModal');
 
 exports.getAllDecorator = catchAsync(async (req, res, next) => {
     const { query } = req;
@@ -63,6 +64,12 @@ exports.deleteDecorator = catchAsync(async (req, res, next) => {
       price,
       yearOfEstd
     });
+
+    await User.findByIdAndUpdate(
+      req.user._id, 
+      { $push: { 'post.Decorator': { $each: [newDecorator._id], $position: 0 } } }, 
+      { new: true } // Return the updated document
+    );
   
     // Send back a response with the newly created decorator
     res.status(201).json({

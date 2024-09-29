@@ -1,7 +1,8 @@
 const Caterer = require('../models/catererModal');
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
-const AppError  = require("../utils/appError")
+const AppError  = require("../utils/appError");
+const User = require('../models/userModal');
 
 exports.getAllCaterer = catchAsync(async (req, res, next) => {
     const { query } = req;
@@ -68,6 +69,12 @@ exports.deleteCaterer = catchAsync(async (req, res, next) => {
       standard,
       deluxe,
     });
+
+    await User.findByIdAndUpdate(
+      req.user._id, 
+      { $push: { 'post.Caterer': { $each: [newCaterer._id], $position: 0 } } }, 
+      { new: true } // Return the updated document
+    );
   
     // Respond with the newly created caterer
     res.status(201).json({
