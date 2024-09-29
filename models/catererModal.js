@@ -67,10 +67,16 @@ const catererSchema = new Schema({
     type: String,
     maxlength: 255,
   },
-  photos: {
-    type: [String],
-    default: [],
-  },
+  // photos: {
+  //   type: [String],
+  //   default: [],
+  // },
+  gallery: [
+    {
+      name: String,
+      photos: [String],
+    },
+  ],
   basic: sectionSchema,    
   standard: sectionSchema, 
   deluxe: sectionSchema,  

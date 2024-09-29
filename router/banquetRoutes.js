@@ -1,6 +1,7 @@
 const express = require("express");
 const authController = require("../controllers/authController.js");
 const banquetController = require("../controllers/banquetController.js");
+const utilsController = require("../controllers/utilsController.js");
 const { uploadImages } = require("../controllers/multerController.js");
 
 const router = express.Router();
@@ -38,7 +39,7 @@ router
     authController.protect,
     authController.restrictTo("admin", "seller"),
     uploadImages('photos[]'),
-    banquetController.addNewFolder
+    utilsController.addNewFolder
   );
 
   router
@@ -47,7 +48,7 @@ router
     authController.protect,
     authController.restrictTo("admin", "seller"),
     uploadImages('addImagesArray[]'),
-    banquetController.patchFolder
+    utilsController.patchFolder
   );
 
 module.exports = router;

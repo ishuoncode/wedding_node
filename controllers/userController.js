@@ -302,7 +302,7 @@ exports.sellerDraft = catchAsync(async (req, res, next) => {
 });
 
 exports.documentUpdate = catchAsync(async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { document, draft } = req.body;
 
   // Check if draft and document are provided
@@ -316,7 +316,7 @@ exports.documentUpdate = catchAsync(async (req, res, next) => {
     return next(new AppError("No user found with that ID.", 404));
   }
 
-  console.log(user,"user")
+  // console.log(user,"user")
 
 
  
@@ -338,81 +338,132 @@ exports.documentUpdate = catchAsync(async (req, res, next) => {
 
 exports.sellerRequest = catchAsync(async (req, res, next) => {
   // Fetch user by ID
-  console.log("SdsdsdfsfS")
+  // console.log("SdsdsdfsfS")
+  
   const user = await User.findById(req.params.id);
-
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 });
   }
 
-  // Destructure personal, important, and government information
-  const {
-    firstName,
-    middleName,
-    lastName,
-    email,
-    phoneNumber,
-    address,
-    pincode,
-    city,
-    state,
-    whatsappNumber,
-  } = user.draft?.personalInfo || {};
+  let seller
 
-  const {
-    GSTNO,
-    bank = { name: undefined, account: undefined, reenterAccount: undefined, ifsc: undefined, holdername: undefined },
-  } = user.draft?.importantInfo || {};
+  if(!user.sellerid){
 
-  const {
-    pancard,
-    document,
-    allowed,
-  } = user.draft?.governmentInfo || {};
+  
+    // Destructure personal, important, and government information
+    const {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      pincode,
+      city,
+      state,
+      whatsappNumber,
+    } = user.draft?.personalInfo || {};
+  
+    const {
+      GSTNO,
+      bank = { name: undefined, account: undefined, reenterAccount: undefined, ifsc: undefined, holdername: undefined },
+    } = user.draft?.importantInfo || {};
+  
+    const {
+      pancard,
+      document,
+      allowed,
+    } = user.draft?.governmentInfo || {};
+  
+    // Prepare the data for the Seller model
+    const sellerData = {
+      firstName,
+      middleName,
+      lastName,
+      email,
+      phoneNumber,
+      address,
+      pincode,
+      city,
+      state,
+      whatsappNumber,
+      GSTNO,
+      bank: {
+        name: bank.name,
+        account: bank.account,
+        reenterAccount: bank.reenterAccount,
+        ifsc: bank.ifsc,
+        holdername: bank.holdername,
+      },
+      pancard,
+      document,
+      allowed,
+      userid: req.params.id,
+    };
+    // Create the seller record
+     seller = await Seller.create(sellerData);
+    
+      if (!seller) {
+        return next(new AppError("Error creating seller record", 500));
+      }
+      console.log(seller, "seller");
 
-  // Prepare the data for the Seller model
-  const sellerData = {
-    firstName,
-    middleName,
-    lastName,
-    email,
-    phoneNumber,
-    address,
-    pincode,
-    city,
-    state,
-    whatsappNumber,
-    GSTNO,
-    bank: {
-      name: bank.name,
-      account: bank.account,
-      reenterAccount: bank.reenterAccount,
-      ifsc: bank.ifsc,
-      holdername: bank.holdername,
-    },
-    pancard,
-    document,
-    allowed,
-    userid: req.params.id,
-  };
-
-  // Create the seller record
-  const seller = await Seller.create(sellerData);
-
-  if (!seller) {
-    return next(new AppError("Error creating seller record", 500));
-  }
-
-  console.log(seller, "seller");
-
-  // Update user status and save in one go
-  user.sellerRequest = "pending";
-  await user.save();
-
+      //Add seller id to user.sellerid
+      user.sellerid=seller._id;
+    }else{
+       await Seller.findByIdAndUpdate(
+        user.sellerid,
+        { status: "Pending" },
+        { new: true } // This option returns the updated document
+    );
+    }
+      
+      // Update user status and save in one go
+      user.sellerRequest = "pending";
+      
+      await user.save();
+  
   // Send response
   res.status(200).json({
     status: "success",
     message: "Seller request created successfully",
     data: seller,
+  });
+});
+
+
+exports.getWishlist = catchAsync(async (req, res, next) => {
+  const id = req.user._id.toString(); // Get the user's ID
+
+  // Find the user and populate the wishlist fields with corresponding data
+  const user = await User.findById(id)
+    .populate({
+      path: 'wishlist.Banquet',
+      select: 'name location services description price capacity', // Select relevant fields from the Banquet model
+    })
+    .populate({
+      path: 'wishlist.Caterer',
+      select: 'name price services description', // Select relevant fields from the Caterer model
+    })
+    .populate({
+      path: 'wishlist.Photographer',
+      select: 'name services price', // Select relevant fields from the Photographer model
+    })
+    .populate({
+      path: 'wishlist.Decorator',
+      select: 'name outerdescription innerdescription price', // Select relevant fields from the Decorator model
+    });
+
+  // Check if the user exists
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+
+  // Return the user's wishlist
+  res.status(200).json({
+    status: "success",
+    data: {
+      wishlist: user.wishlist,
+    },
   });
 });

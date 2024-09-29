@@ -1,7 +1,8 @@
 const Photographer = require('../models/photographerModal');
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
-const AppError  = require("../utils/appError")
+const AppError  = require("../utils/appError");
+const User = require('../models/userModal');
 
 exports.getAllPhotographer = catchAsync(async (req, res, next) => {
     const { query } = req;
@@ -65,6 +66,12 @@ exports.deletePhotographer = catchAsync(async (req, res, next) => {
       services,
       occasion
     });
+
+    await User.findByIdAndUpdate(
+      req.user._id, 
+      { $push: { 'post.Photographer': { $each: [newPhotographer._id], $position: 0 } } }, 
+      { new: true } // Return the updated document
+    );
   
     // Send back a response with the newly created photographer
     res.status(201).json({
