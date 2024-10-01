@@ -48,8 +48,7 @@ exports.deletePhotographer = catchAsync(async (req, res, next) => {
   exports.createPhotographer = catchAsync(async (req, res, next) => {
     const {
       name,
-      innerdescription,
-      outerdescription,
+      description,
       location,
       price,
       yearOfEstd,
@@ -60,8 +59,7 @@ exports.deletePhotographer = catchAsync(async (req, res, next) => {
     // Create a new photographer entry in the database
     const newPhotographer = await Photographer.create({
       name,
-      innerdescription,
-      outerdescription,
+      description,
       location,
       price,
       yearOfEstd,
