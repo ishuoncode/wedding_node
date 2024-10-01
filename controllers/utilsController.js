@@ -214,8 +214,15 @@ exports.addWishlist = catchAsync(async (req, res, next) => {
 
   const user = await User.findByIdAndUpdate(
     id,
-    { $addToSet: { [`wishlist.${category}`]: itemId } }, // Use $addToSet to avoid duplicates
-    { new: true, runValidators: true } // Ensure validation runs
+    {
+      $push: {
+        [`wishlist.${category}`]: {
+          $each: [itemId],  // The item to add
+          $position: 0      // Ensures the item is added at the start of the array
+        }
+      }
+    },
+    { new: true, runValidators: true } // Ensure validation runs and return the updated document
   );
   if (!user) {
     return res.status(404).json({ status: "error", message: "User not found" });

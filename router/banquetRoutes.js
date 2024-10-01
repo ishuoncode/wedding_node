@@ -38,16 +38,16 @@ router
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('photos[]'),
+    uploadImages("photos[]"),
     utilsController.addNewFolder
   );
 
-  router
+router
   .route("/:id/folder/:folderid")
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('addImagesArray[]'),
+    uploadImages("addImagesArray[]"),
     utilsController.patchFolder
   );
 
