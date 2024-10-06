@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose; 
-const Review =  require("./review");
-
+const Review = require("./review");
 
 const banquetSchema = new Schema({
   photo: [
@@ -18,16 +17,17 @@ const banquetSchema = new Schema({
   },
   rating: {
     type: Number,
-    // required: true,
     default: 4.5,
     min: 1,
     max: 5,
+    set: val => Math.round(val * 10) / 10 
   },
   adminRating: {
     type: Number,
     select: false,
     min: 1,
     max: 5,
+    set: val => Math.round(val * 10) / 10 
   },
   location: {
     city: {
@@ -44,7 +44,13 @@ const banquetSchema = new Schema({
     },
   },
   locationUrl: {
-    type: String,
+    type: {
+      type: String,
+      default: 'Point',
+      enum: ['Point']
+    },
+    coordinates: [Number],
+    url: String,
   },
   description: {
     type: String,
@@ -92,7 +98,7 @@ const banquetSchema = new Schema({
       message: 'At least one availability is required',
     },
   },
-  reviews: [Review.schema], // Uncomment this if you have a Review model/schema
+  reviews: [Review.schema],
   billboard: {
     type: String,
     maxlength: 255,
@@ -112,8 +118,10 @@ const banquetSchema = new Schema({
       photos: [String],
     },
   ],
-  // createdAt: { type: Date, default: Date.now }, // Uncomment if you want a createdAt field
 });
+
+// Index for geospatial queries
+banquetSchema.index({ 'location.coordinates': '2dsphere' });
 
 const Banquet = mongoose.model('Banquet', banquetSchema);
 module.exports = Banquet;

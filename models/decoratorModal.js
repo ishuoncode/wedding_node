@@ -17,12 +17,14 @@ const decoratorSchema = new Schema({
     default: 4.5,
     min: 1,
     max: 5,
+    set: val => Math.round(val * 10) / 10 
   },
   adminRating: {
     type: Number,
     select: false,
     min: 1,
     max: 5,
+    set: val => Math.round(val * 10) / 10 
   },
   location: { city: String, pincode: String, area: String },
 

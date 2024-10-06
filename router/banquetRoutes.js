@@ -6,6 +6,14 @@ const { uploadImages } = require("../controllers/multerController.js");
 
 const router = express.Router();
 
+router.patch(
+  "/:id/locationurl",
+  authController.protect,
+  authController.restrictTo("admin","seller"),
+  banquetController.locationUrl
+);
+router.get('/near/:distance/:latlng',  authController.protect, banquetController.getBanquetsWithinRange);
+
 router
   .route("/")
   .get(banquetController.getAllBanquet)
