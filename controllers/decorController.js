@@ -48,8 +48,8 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
   exports.createDecorator = catchAsync(async (req, res, next) => {
     const {
       name,
-      innerdescription,
-      outerdescription,
+      description,
+      contactUs,
       location,
       price,
       yearOfEstd
@@ -58,8 +58,8 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
     // Create a new decorator entry in the database
     const newDecorator = await Decorator.create({
       name,
-      innerdescription,
-      outerdescription,
+      description,
+      contactUs,
       location,
       price,
       yearOfEstd
@@ -86,8 +86,8 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
     // Destructure the request body to extract fields that can be updated
     const {
       name,
-      innerdescription,
-      outerdescription,
+      description,
+      contactUs,
       location,
       price,
       yearOfEstd
@@ -96,8 +96,8 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
     // Build the update object dynamically based on fields provided in req.body
     const updateFields = {
       ...(name && { name }),
-      ...(innerdescription && { innerdescription }),
-      ...(outerdescription && { outerdescription }),
+      ...(description && { description }),
+      ...(contactUs  && { contactUs  }),
       ...(location && { location }),
       ...(price && { price }),
       ...(yearOfEstd && { yearOfEstd }),

@@ -63,7 +63,10 @@ const catererSchema = new Schema({
       ref: "User",
     },
   ],
-  contactUs: Number,
+  contactUs :{
+    type: Number,
+    required: [true, "contactUs is required!"],
+    },
   yearOfEstd: Number,
   billboard: {
     type: String,
