@@ -9,10 +9,14 @@ const router = express.Router();
 router.patch(
   "/:id/locationurl",
   authController.protect,
-  authController.restrictTo("admin","seller"),
+  authController.restrictTo("admin", "seller"),
   banquetController.locationUrl
 );
-router.get('/near/:distance/:latlng',  authController.protect, banquetController.getBanquetsWithinRange);
+router.get(
+  "/near/:distance/:latlng",
+  authController.protect,
+  banquetController.getBanquetsWithinRange
+);
 
 router
   .route("/")
@@ -26,12 +30,19 @@ router
 router
   .route("/:id")
   .get(banquetController.getBanquet)
-  .delete(
+  .patch(
     authController.protect,
-    authController.restrictTo("admin"),
-    banquetController.deleteBanquet
+    authController.restrictTo("admin", "seller"),
+    banquetController.patchBanquet
   );
 
+router
+  .route("/:id/:category")
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    utilsController.deleteEntity
+  );
 // router
 //   .route("/:id/gallery")
 //   .patch(

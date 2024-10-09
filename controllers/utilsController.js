@@ -196,6 +196,62 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
     },
   });
 });
+exports.deleteEntity = catchAsync(async (req, res, next) => {
+  const { id, category } = req.params;
+
+  // Dynamically select the model based on the category
+  const Model = models[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  // Find the entity (e.g., Banquet, Caterer) by ID
+  const entity = await Model.findById(id);
+  if (!entity) {
+    return next(new AppError(`${category} not found with that ID`, 404));
+  }
+
+  // Extract all photos from the entity's gallery
+  const deleteImages = entity.gallery.flatMap(item => item.photos);
+
+  if (deleteImages && deleteImages.length > 0) {
+    // Extract S3 keys from deleteImages (URLs)
+    const extractPart = (array) => {
+      return array.map((url) => {
+        const key = decodeURIComponent(url.split(".com/")[1]); // Extract the part after ".com/"
+        return key ? key : ""; // Return the extracted key or an empty string if not found
+      });
+    };
+
+    const DeleteFolderImages = extractPart(deleteImages);
+    console.log(DeleteFolderImages, "Images to delete");
+
+    // Delete images from S3 if needed
+    if (DeleteFolderImages && DeleteFolderImages.length > 0) {
+      try {
+        await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Pass only the key prefix
+
+        // After successful deletion from S3, proceed to delete the entity
+        await Model.findByIdAndDelete(id);
+
+        // Send response
+        return res.status(204).json({
+          status: "success",
+          data: null,
+        });
+      } catch (err) {
+        return next(new AppError("Failed to delete images from S3", 500));
+      }
+    }
+  } else {
+    // If no images to delete, directly delete the entity
+    await Model.findByIdAndDelete(id);
+    return res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  }
+});
 
 exports.addWishlist = catchAsync(async (req, res, next) => {
   // console.log("sdjskdjskdjdksdjksdjkjdsdksdksdssd");

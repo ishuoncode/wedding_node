@@ -37,16 +37,54 @@ exports.getBanquet = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteBanquet = catchAsync(async (req, res, next) => {
-  const banquet = await Banquet.findByIdAndDelete(req.params.id);
-  if (!banquet) {
-    return next(new AppError("No document found with that ID", 404));
-  }
-  res.status(204).json({
-    status: "success",
-    data: null,
-  });
-});
+// exports.deleteBanquet = catchAsync(async (req, res, next) => {
+//   const banquet = await Banquet.findById(req.params.id);
+//   if (!banquet) {
+//     return next(new AppError("No document found with that ID", 404));
+//   }
+
+//   // Extract all photos from the banquet gallery
+//   const deleteImages = banquet.gallery.flatMap(item => item.photos);
+
+//   if (deleteImages && deleteImages.length > 0) {
+//     // Extract S3 keys from deleteImageArray (URLs)
+//     const extractPart = (array) => {
+//       return array.map((url) => {
+//         const key = decodeURIComponent(url.split(".com/")[1]); // Extract the part after ".com/"
+//         return key ? key : ""; // Return the extracted key or an empty string if not found
+//       });
+//     };
+
+//     const DeleteFolderImages = extractPart(deleteImages);
+//     console.log(DeleteFolderImages, "Images to delete");
+
+//     // Delete images from S3 if needed
+//     if (DeleteFolderImages && DeleteFolderImages.length > 0) {
+//       try {
+//         await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Pass only the key prefix
+
+//         // After successful deletion from S3, proceed to delete the banquet
+//         await Banquet.findByIdAndDelete(req.params.id);
+
+//         // Send response
+//         return res.status(204).json({
+//           status: "success",
+//           data: null,
+//         });
+//       } catch (err) {
+//         return next(new AppError("Failed to delete images from S3", 500));
+//       }
+//     }
+//   } else {
+//     // If no images to delete, directly delete the banquet
+//     await Banquet.findByIdAndDelete(req.params.id);
+//     return res.status(204).json({
+//       status: "success",
+//       data: null,
+//     });
+//   }
+// });
+
 
 exports.createBanquet = catchAsync(async (req, res, next) => {
   // const {user}=req.user
@@ -97,6 +135,72 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.patchBanquet = catchAsync(async (req, res, next) => {
+  const { id } = req.params; // Assuming the banquet ID is passed as a parameter in the URL
+
+  // Destructure req.body to get only the fields allowed for update
+  const {
+    name,
+    location,
+    services,
+    description,
+    price,
+    capacity,
+    specialFeature,
+    yearOfEstd,
+    availability,
+    openHours,
+    operatingDays,
+    type,
+    billboard,
+  } = req.body;
+
+  // Create the update object with only non-null fields from req.body
+  const updateFields = {
+    ...(name && { name }),
+    ...(location && { location }),
+    ...(services && { services }),
+    ...(description && { description }),
+    ...(price && { price }),
+    ...(capacity && { capacity }),
+    ...(specialFeature && { specialFeature }),
+    ...(yearOfEstd && { yearOfEstd }),
+    ...(availability && { availability }),
+    ...(openHours && { openHours }),
+    ...(operatingDays && { operatingDays }),
+    ...(type && { type }),
+    ...(billboard && { billboard }),
+  };
+
+  // Update the banquet entry if any fields are provided
+  if (Object.keys(updateFields).length > 0) {
+    const updatedBanquet = await Banquet.findByIdAndUpdate(
+      id,
+      { $set: updateFields },
+      { new: true, runValidators: true } // Return the updated document and validate changes
+    );
+
+    if (!updatedBanquet) {
+      return next(new AppError('No banquet found with that ID', 404));
+    }
+
+    // Send response
+    return res.status(200).json({
+      status: "success",
+      data: {
+        banquet: updatedBanquet,
+      },
+    });
+  }
+
+  // If no fields were provided in the body, return a 400 response
+  return res.status(400).json({
+    status: "fail",
+    message: "No fields provided for update",
+  });
+});
+
 
 exports.locationUrl = catchAsync(async (req, res, next) => {
   const { id } = req.params;
