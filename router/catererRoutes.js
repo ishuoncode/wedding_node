@@ -18,30 +18,35 @@ router
 router
   .route("/:id")
   .get(catererController.getCaterer)
-  .delete(
+  .patch(
     authController.protect,
-    authController.restrictTo("admin"),
-    catererController.deleteCaterer
+    authController.restrictTo("admin", "seller"),
+    catererController.patchCaterer
   );
 
-
-  router
+router
+  .route("/:id/:category")
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    utilsController.deleteEntity
+  );
+router
   .route("/:id/newfolder")
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('photos[]'),
+    uploadImages("photos[]"),
     utilsController.addNewFolder
   );
 
-
-  router
+router
   .route("/:id/folder/:folderid")
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('addImagesArray[]'),
+    uploadImages("addImagesArray[]"),
     utilsController.patchFolder
   );
-  
+
 module.exports = router;

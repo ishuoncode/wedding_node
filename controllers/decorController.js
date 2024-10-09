@@ -34,16 +34,16 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.deleteDecorator = catchAsync(async (req, res, next) => {
-    const decorator = await Decorator.findByIdAndDelete(req.params.id);
-    if (!decorator) {
-      return next(new AppError('No document found with that ID', 404));
-    }
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  });
+// exports.deleteDecorator = catchAsync(async (req, res, next) => {
+//     const decorator = await Decorator.findByIdAndDelete(req.params.id);
+//     if (!decorator) {
+//       return next(new AppError('No document found with that ID', 404));
+//     }
+//     res.status(204).json({
+//       status: 'success',
+//       data: null,
+//     });
+//   });
 
   exports.createDecorator = catchAsync(async (req, res, next) => {
     const {
@@ -79,3 +79,55 @@ exports.deleteDecorator = catchAsync(async (req, res, next) => {
       },
     });
   })
+
+  exports.patchDecorator = catchAsync(async (req, res, next) => {
+    const { id } = req.params; // Assuming the decorator ID is passed as a parameter in the URL
+  
+    // Destructure the request body to extract fields that can be updated
+    const {
+      name,
+      innerdescription,
+      outerdescription,
+      location,
+      price,
+      yearOfEstd
+    } = req.body;
+  
+    // Build the update object dynamically based on fields provided in req.body
+    const updateFields = {
+      ...(name && { name }),
+      ...(innerdescription && { innerdescription }),
+      ...(outerdescription && { outerdescription }),
+      ...(location && { location }),
+      ...(price && { price }),
+      ...(yearOfEstd && { yearOfEstd }),
+    };
+  
+    // Update the decorator entry if any fields are provided
+    if (Object.keys(updateFields).length > 0) {
+      const updatedDecorator = await Decorator.findByIdAndUpdate(
+        id,
+        { $set: updateFields },
+        { new: true, runValidators: true } // Return the updated document and validate changes
+      );
+  
+      if (!updatedDecorator) {
+        return next(new AppError('No decorator found with that ID', 404));
+      }
+  
+      // Send response
+      return res.status(200).json({
+        status: "success",
+        data: {
+          decorator: updatedDecorator,
+        },
+      });
+    }
+  
+    // If no fields were provided in the body, return a 400 response
+    return res.status(400).json({
+      status: "fail",
+      message: "No fields provided for update",
+    });
+  });
+  

@@ -34,16 +34,16 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.deleteCaterer = catchAsync(async (req, res, next) => {
-    const caterer = await Caterer.findByIdAndDelete(req.params.id);
-    if (!caterer) {
-      return next(new AppError('No document found with that ID', 404));
-    }
-    res.status(204).json({
-      status: 'success',
-      data: null,
-    });
-  });
+// exports.deleteCaterer = catchAsync(async (req, res, next) => {
+//     const caterer = await Caterer.findByIdAndDelete(req.params.id);
+//     if (!caterer) {
+//       return next(new AppError('No document found with that ID', 404));
+//     }
+//     res.status(204).json({
+//       status: 'success',
+//       data: null,
+//     });
+//   });
 
   exports.createCaterer = catchAsync(async (req, res, next) => {
     // Destructure the request body
@@ -84,3 +84,60 @@ exports.deleteCaterer = catchAsync(async (req, res, next) => {
       },
     });
   });
+
+
+  exports.patchCaterer = catchAsync(async (req, res, next) => {
+    const { id } = req.params; // Assuming the caterer ID is passed as a parameter in the URL
+  
+    // Destructure the request body to extract fields that can be updated
+    const {
+      name,
+      description,
+      yearOfEstd,
+      billboard,
+      photos,
+      basic,
+      standard,
+      deluxe,
+    } = req.body;
+  
+    // Build the update object dynamically based on fields provided in req.body
+    const updateFields = {
+      ...(name && { name }),
+      ...(description && { description }),
+      ...(yearOfEstd && { yearOfEstd }),
+      ...(billboard && { billboard }),
+      ...(photos && { photos }),
+      ...(basic && { basic }),
+      ...(standard && { standard }),
+      ...(deluxe && { deluxe }),
+    };
+  
+    // Update the caterer entry if any fields are provided
+    if (Object.keys(updateFields).length > 0) {
+      const updatedCaterer = await Caterer.findByIdAndUpdate(
+        id,
+        { $set: updateFields },
+        { new: true, runValidators: true } // Return the updated document and validate changes
+      );
+  
+      if (!updatedCaterer) {
+        return next(new AppError('No caterer found with that ID', 404));
+      }
+  
+      // Send response
+      return res.status(200).json({
+        status: "success",
+        data: {
+          caterer: updatedCaterer,
+        },
+      });
+    }
+  
+    // If no fields were provided in the body, return a 400 response
+    return res.status(400).json({
+      status: "fail",
+      message: "No fields provided for update",
+    });
+  });
+  

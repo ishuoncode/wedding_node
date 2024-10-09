@@ -18,28 +18,35 @@ router
 router
   .route("/:id")
   .get(photographerController.getPhotographer)
-  .delete(
+  .patch(
     authController.protect,
-    authController.restrictTo("admin"),
-    photographerController.deletePhotographer
+    authController.restrictTo("admin", "seller"),
+    photographerController.patchPhotographer
   );
 
+router
+  .route("/:id/:category")
+  .delete(
+    authController.protect,
+    authController.restrictTo("admin", "seller"),
+    utilsController.deleteEntity
+  );
 
-  router
+router
   .route("/:id/newfolder")
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('photos[]'),
+    uploadImages("photos[]"),
     utilsController.addNewFolder
   );
 
-  router
+router
   .route("/:id/folder/:folderid")
   .patch(
     authController.protect,
     authController.restrictTo("admin", "seller"),
-    uploadImages('addImagesArray[]'),
+    uploadImages("addImagesArray[]"),
     utilsController.patchFolder
   );
 
