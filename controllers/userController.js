@@ -447,11 +447,11 @@ exports.getWishlist = catchAsync(async (req, res, next) => {
     })
     .populate({
       path: 'wishlist.Photographer',
-      select: 'name services price location rating gallery', // Select relevant fields from the Photographer model
+      select: 'name services price description location rating gallery', // Select relevant fields from the Photographer model
     })
     .populate({
       path: 'wishlist.Decorator',
-      select: 'name outerdescription innerdescription price location rating gallery', // Select relevant fields from the Decorator model
+      select: 'name description price location rating gallery', // Select relevant fields from the Decorator model
     });
 
   // Check if the user exists
