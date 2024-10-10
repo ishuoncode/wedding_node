@@ -41,7 +41,10 @@ const photographerSchema = new Schema({
       ref: 'User', 
     },
   ],
-  contactUs: Number,
+  contactUs :{
+    type: Number,
+    required: [true, "contactUs is required!"],
+    },
   yearOfEstd: Number,
   services: [String],
   reviews: [Review.schema], // Using Review schema as a sub-document

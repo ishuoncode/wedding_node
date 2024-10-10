@@ -35,7 +35,10 @@ const decoratorSchema = new Schema({
       ref: 'User', 
     },
   ],
-  contactUs: Number,
+  contactUs :{
+    type: Number,
+    required: [true, "contactUs is required!"],
+    },
   yearOfEstd: Number,
 
   reviews: [Review.schema],

@@ -56,6 +56,10 @@ const banquetSchema = new Schema({
     type: String,
     required: [true, 'Description is required'],
   },
+  contactUs :{
+  type: Number,
+  required: [true, "contactUs is required!"],
+  },
   price: {
     type: Number,
     required: [true, 'Price is required'],
