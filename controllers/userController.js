@@ -439,19 +439,19 @@ exports.getWishlist = catchAsync(async (req, res, next) => {
   const user = await User.findById(id)
     .populate({
       path: 'wishlist.Banquet',
-      select: 'name location services description price capacity', // Select relevant fields from the Banquet model
+      select: 'name location services description price capacity rating gallery', // Select relevant fields from the Banquet model
     })
     .populate({
       path: 'wishlist.Caterer',
-      select: 'name price services description', // Select relevant fields from the Caterer model
+      select: 'name price services description location rating gallery', // Select relevant fields from the Caterer model
     })
     .populate({
       path: 'wishlist.Photographer',
-      select: 'name services price', // Select relevant fields from the Photographer model
+      select: 'name services price location rating gallery', // Select relevant fields from the Photographer model
     })
     .populate({
       path: 'wishlist.Decorator',
-      select: 'name outerdescription innerdescription price', // Select relevant fields from the Decorator model
+      select: 'name outerdescription innerdescription price location rating gallery', // Select relevant fields from the Decorator model
     });
 
   // Check if the user exists
