@@ -326,14 +326,16 @@ exports.removeWishlist = catchAsync(async (req, res, next) => {
 exports.userReview = catchAsync(async (req, res, next) => {
   const userid = req.user._id.toString();
   const { id } = req.params;
-  const { category, tag, content, rating } = req.body;
+  const { category, tag, content, rating, username, userphoto } = req.body;
 
   const Model = models[category];
   if (!Model) {
     return next(new AppError(`No model found for category: ${category}`, 400));
   }
-  if (!content || !rating) {
-    return next(new AppError("Please provide both content and rating", 400));
+  
+  // Check for mandatory fields
+  if (!content || !rating || !username) {
+    return next(new AppError("Please provide content, rating, and username", 400));
   }
 
   const item = await Model.findById(id);
@@ -350,6 +352,8 @@ exports.userReview = catchAsync(async (req, res, next) => {
     existingReview.tag = tag;
     existingReview.content = content;
     existingReview.rating = rating;
+    existingReview.username = username; // Update username if necessary
+    existingReview.userphoto = userphoto; // Update userphoto if provided
     existingReview.date = new Date();
   } else {
     // Add a new review at the beginning of the array
@@ -358,6 +362,8 @@ exports.userReview = catchAsync(async (req, res, next) => {
       tag,
       content,
       rating,
+      username,  // Include username
+      userphoto, // Include userphoto (optional)
       date: new Date(),
     };
 
@@ -373,6 +379,7 @@ exports.userReview = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 
 
 exports.deleteReview = catchAsync(async (req, res, next) => {

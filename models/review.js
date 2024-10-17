@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
+const { type } = require("os");
 const { Schema } = mongoose;
 const reviewSchema = new Schema({
   content: {
     type: String,
     required: [true, "Review content cannot be blank"],
   },
+  username:{type:String,required:[true,"Reviews username cannot be blank"]},
+  userphoto:{type:String},
   rating: {
     type: Number,
     required: [true, "Rating is required"],
