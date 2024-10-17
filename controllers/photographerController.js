@@ -20,19 +20,33 @@ exports.getAllPhotographer = catchAsync(async (req, res, next) => {
 })
 
 exports.getPhotographer = catchAsync(async (req, res, next) => {
-    const photographer = await Photographer.findById(req.params.id);
-    
-    // Check if banquet is found
-    if (!photographer) {
-        return next(new AppError('photographer not found', 404));
-    }
+  const photographer = await Photographer.findById(req.params.id)
+      .select('-reviews') // Exclude reviews initially
+      .lean(); // Convert the document to a plain JavaScript object for better performance
 
-    // If found, return success response
-    res.status(200).json({
-        message: 'success',
-        data: photographer,
-    });
+  // Check if photographer is found
+  if (!photographer) {
+      return next(new AppError('Photographer not found', 404));
+  }
+
+  // Fetch only the first 10 reviews separately if there are any reviews
+  const reviews = await Photographer.findById(req.params.id)
+      .select('reviews')
+      .slice('reviews', 10) // Limit to the first 10 reviews
+      .lean();
+
+  // Merge the limited reviews into the photographer object
+  if (reviews && reviews.reviews) {
+      photographer.reviews = reviews.reviews;
+  }
+
+  // If found, return success response
+  res.status(200).json({
+      message: 'success',
+      data: photographer,
+  });
 });
+
 
 // exports.deletePhotographer = catchAsync(async (req, res, next) => {
 //     const photographer = await Photographer.findByIdAndDelete(req.params.id);

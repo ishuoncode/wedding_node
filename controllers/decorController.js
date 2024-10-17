@@ -20,19 +20,33 @@ exports.getAllDecorator = catchAsync(async (req, res, next) => {
 })
 
 exports.getDecorator = catchAsync(async (req, res, next) => {
-    const decorator = await Decorator.findById(req.params.id);
-    
-    // Check if banquet is found
-    if (!decorator) {
-        return next(new AppError('decorator not found', 404));
-    }
+  const decorator = await Decorator.findById(req.params.id)
+      .select('-reviews') // Exclude reviews initially
+      .lean(); // Convert the document to a plain JavaScript object for better performance
 
-    // If found, return success response
-    res.status(200).json({
-        message: 'success',
-        data: decorator,
-    });
+  // Check if decorator is found
+  if (!decorator) {
+      return next(new AppError('Decorator not found', 404));
+  }
+
+  // Fetch only the first 10 reviews separately if there are any reviews
+  const reviews = await Decorator.findById(req.params.id)
+      .select('reviews')
+      .slice('reviews', 10) // Limit to the first 10 reviews
+      .lean();
+
+  // Merge the limited reviews into the decorator object
+  if (reviews && reviews.reviews) {
+      decorator.reviews = reviews.reviews;
+  }
+
+  // If found, return success response
+  res.status(200).json({
+      message: 'success',
+      data: decorator,
+  });
 });
+
 
 // exports.deleteDecorator = catchAsync(async (req, res, next) => {
 //     const decorator = await Decorator.findByIdAndDelete(req.params.id);

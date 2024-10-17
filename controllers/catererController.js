@@ -20,19 +20,33 @@ exports.getAllCaterer = catchAsync(async (req, res, next) => {
 })
 
 exports.getCaterer = catchAsync(async (req, res, next) => {
-    const caterer = await Caterer.findById(req.params.id);
-    
-    // Check if banquet is found
-    if (!caterer) {
-        return next(new AppError('caterer not found', 404));
-    }
+  const caterer = await Caterer.findById(req.params.id)
+      .select('-reviews') // Exclude reviews initially
+      .lean(); // Convert the document to a plain JavaScript object for better performance
 
-    // If found, return success response
-    res.status(200).json({
-        message: 'success',
-        data: caterer,
-    });
+  // Check if caterer is found
+  if (!caterer) {
+      return next(new AppError('Caterer not found', 404));
+  }
+
+  // Fetch only the first 10 reviews separately if there are any reviews
+  const reviews = await Caterer.findById(req.params.id)
+      .select('reviews')
+      .slice('reviews', 10) // Limit to the first 10 reviews
+      .lean();
+
+  // Merge the limited reviews into the caterer object
+  if (reviews && reviews.reviews) {
+      caterer.reviews = reviews.reviews;
+  }
+
+  // If found, return success response
+  res.status(200).json({
+      message: 'success',
+      data: caterer,
+  });
 });
+
 
 // exports.deleteCaterer = catchAsync(async (req, res, next) => {
 //     const caterer = await Caterer.findByIdAndDelete(req.params.id);

@@ -23,11 +23,24 @@ exports.getAllBanquet = catchAsync(async (req, res, next) => {
 });
 
 exports.getBanquet = catchAsync(async (req, res, next) => {
-  const banquet = await Banquet.findById(req.params.id);
+  const banquet = await Banquet.findById(req.params.id)
+    .select('-reviews') // Exclude reviews initially
+    .lean(); // Convert the document to a plain JavaScript object for better performance
 
   // Check if banquet is found
   if (!banquet) {
     return next(new AppError("Banquet not found", 404));
+  }
+
+  // Fetch only the first 10 reviews separately if there are any reviews
+  const reviews = await Banquet.findById(req.params.id)
+    .select('reviews')
+    .slice('reviews', 10) // Limit to the first 10 reviews
+    .lean();
+
+  // Merge the limited reviews into the banquet object
+  if (reviews && reviews.reviews) {
+    banquet.reviews = reviews.reviews;
   }
 
   // If found, return success response
@@ -36,6 +49,7 @@ exports.getBanquet = catchAsync(async (req, res, next) => {
     data: banquet,
   });
 });
+
 
 // exports.deleteBanquet = catchAsync(async (req, res, next) => {
 //   const banquet = await Banquet.findById(req.params.id);

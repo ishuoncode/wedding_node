@@ -212,7 +212,7 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
   }
 
   // Extract all photos from the entity's gallery
-  const deleteImages = entity.gallery.flatMap(item => item.photos);
+  const deleteImages = entity.gallery.flatMap((item) => item.photos);
 
   if (deleteImages && deleteImages.length > 0) {
     // Extract S3 keys from deleteImages (URLs)
@@ -259,8 +259,6 @@ exports.addWishlist = catchAsync(async (req, res, next) => {
   const id = req.user._id.toString();
   const { itemId, category } = req.body;
 
-
-
   const validCategories = ["Banquet", "Caterer", "Photographer", "Decorator"]; // Ensure category matches lowercase
   if (!validCategories.includes(category)) {
     return res
@@ -273,10 +271,10 @@ exports.addWishlist = catchAsync(async (req, res, next) => {
     {
       $push: {
         [`wishlist.${category}`]: {
-          $each: [itemId],  // The item to add
-          $position: 0      // Ensures the item is added at the start of the array
-        }
-      }
+          $each: [itemId], // The item to add
+          $position: 0, // Ensures the item is added at the start of the array
+        },
+      },
     },
     { new: true, runValidators: true } // Ensure validation runs and return the updated document
   );
@@ -324,3 +322,132 @@ exports.removeWishlist = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.userReview = catchAsync(async (req, res, next) => {
+  const userid = req.user._id.toString();
+  const { id } = req.params;
+  const { category, tag, content, rating } = req.body;
+
+  const Model = models[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+  if (!content || !rating) {
+    return next(new AppError("Please provide both content and rating", 400));
+  }
+
+  const item = await Model.findById(id);
+  if (!item) {
+    return next(new AppError(`No item found with ID: ${id}`, 404));
+  }
+
+  const existingReview = item.reviews.find(
+    (review) => review.userId.toString() === userid
+  );
+
+  if (existingReview) {
+    // Update the existing review
+    existingReview.tag = tag;
+    existingReview.content = content;
+    existingReview.rating = rating;
+    existingReview.date = new Date();
+  } else {
+    // Add a new review at the beginning of the array
+    const newReview = {
+      userId: userid,
+      tag,
+      content,
+      rating,
+      date: new Date(),
+    };
+
+    item.reviews.unshift(newReview); // Add the new review at the 0 index
+  }
+
+  await item.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      item,
+    },
+  });
+});
+
+
+exports.deleteReview = catchAsync(async (req, res, next) => {
+  const userid = req.user._id.toString();
+  const { id } = req.params;
+  const { category } = req.query;
+
+  const Model = models[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  // Find the item by its ID
+  const item = await Model.findById(id);
+  if (!item) {
+    return next(new AppError(`No item found with ID: ${id}`, 404));
+  }
+
+  // Find the review index for the user
+  const reviewIndex = item.reviews.findIndex(
+    (review) => review.userId.toString() === userid
+  );
+
+  if (reviewIndex === -1) {
+    return next(new AppError("Review not found for this user", 404));
+  }
+
+  // Remove the review from the array
+  item.reviews.splice(reviewIndex, 1);
+
+  // Save the updated item
+  await item.save();
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
+
+exports.getMoreReviews = catchAsync(async (req, res, next) => {
+  const { id, category } = req.params;
+  const { page = 1, limit = 10 } = req.query; 
+
+  // Validate the inputs
+  const pageNumber = parseInt(page, 10);
+  const limitNumber = parseInt(limit, 10);
+
+  if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber <= 0 || limitNumber <= 0) {
+    return next(new AppError("Invalid page or limit values", 400));
+  }
+
+  // Get the model based on the category
+  const Model = models[category]; // Assuming models is an object containing your Mongoose models
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  // Fetch the item and limit the number of reviews
+  const item = await Model.findById(id)
+    .select('reviews')
+    .slice('reviews', [(pageNumber - 1) * limitNumber, limitNumber])
+    .lean();
+
+  if (!item) {
+    return next(new AppError(`${category.charAt(0).toUpperCase() + category.slice(1)} not found`, 404));
+  }
+
+  // Return the reviews
+  res.status(200).json({
+    status: "success",
+    data: {
+      reviews: item.reviews,
+      page: pageNumber,
+      limit: limitNumber,
+    },
+  });
+});
+

@@ -10,14 +10,19 @@ router.post("/signup", authController.signup);
 router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
-router.get("/sellerpost",authController.protect,authController.restrictTo("admin","seller"),userController.sellerpost)
+router.get(
+  "/sellerpost",
+  authController.protect,
+  authController.restrictTo("admin", "seller"),
+  userController.sellerpost
+);
 router
   .route("/addwishlist")
   .patch(authController.protect, utilsController.addWishlist);
 router
   .route("/removewishlist")
   .patch(authController.protect, utilsController.removeWishlist);
-router.get("/wishlist", authController.protect,userController.getWishlist);
+router.get("/wishlist", authController.protect, userController.getWishlist);
 
 router.patch(
   "/image/:id",
@@ -58,5 +63,14 @@ router
 router
   .route("/:id/sellerRequest")
   .get(authController.protect, userController.sellerRequest);
+
+router
+  .route("/userreview/:id")
+  .post(authController.protect, utilsController.userReview)
+  .delete(authController.protect, utilsController.deleteReview);
+  
+router
+  .route("/reviews/:category/:id")
+  .get(authController.protect, utilsController.getMoreReviews);
 
 module.exports = router;
