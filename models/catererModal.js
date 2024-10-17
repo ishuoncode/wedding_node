@@ -65,7 +65,6 @@ const catererSchema = new Schema({
   ],
   contactUs :{
     type: Number,
-    required: [true, "contactUs is required!"],
     },
   yearOfEstd: Number,
   billboard: {

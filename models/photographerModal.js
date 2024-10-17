@@ -43,7 +43,6 @@ const photographerSchema = new Schema({
   ],
   contactUs :{
     type: Number,
-    required: [true, "contactUs is required!"],
     },
   yearOfEstd: Number,
   services: [String],
