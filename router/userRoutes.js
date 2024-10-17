@@ -10,6 +10,7 @@ router.post("/signup", authController.signup);
 router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
+router.get("/sellerpost",authController.protect,authController.restrictTo("admin","seller"),userController.sellerpost)
 router
   .route("/addwishlist")
   .patch(authController.protect, utilsController.addWishlist);

@@ -101,28 +101,28 @@ exports.addProfileImage = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("User not found", 404));
   }
-  
+
   // Delete the existing image if it exists
   if (user.image) {
     const imageUrl = user.image;
     const imageKey = imageUrl.split("/").slice(-1)[0];
-  
+
     await deleteFile(imageKey, "dream-wedding/images/user");
     console.log(`Image ${imageKey} deleted successfully from S3`);
   }
-  
+
   // Check if a new image is provided
   if (!image) {
     return next(new AppError("No image provided", 400));
   }
-  
+
   // Update the image URL
   const baseUrl = `https://dream-wedding.s3.eu-north-1.amazonaws.com/images/user/`;
   const updateImage = `${baseUrl}${image}`;
-  
+
   user.image = updateImage; // Update the image field
   await user.save({ validateBeforeSave: true }); // Save the user with new image
-  
+
   // Send response
   res.status(200).json({
     status: "success",
@@ -130,7 +130,6 @@ exports.addProfileImage = catchAsync(async (req, res, next) => {
       user,
     },
   });
-  
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
@@ -247,34 +246,36 @@ exports.sellerDraft = catchAsync(async (req, res, next) => {
 
   console.log(data, "data");
   // Update the user draft field in the database
-  let user
+  let user;
 
   if (draft === "governmentInfo") {
     // Find the user
     user = await User.findById(req.params.id);
-    
+
     if (!user) {
       return next(new AppError("No user found with that ID.", 404));
     }
-  
+
     // Check if there is an existing governmentInfo document to delete
     if (user.draft.governmentInfo && user.draft.governmentInfo.document) {
       const existingDocument = user.draft.governmentInfo.document;
       console.log(existingDocument, "old document");
-      
+
       try {
         const imageKey = existingDocument.split("/").slice(-1)[0]; // Extract the key
         await deleteFile(imageKey, "dream-wedding/images/seller"); // Delete the existing document from S3
         console.log(`Document ${imageKey} deleted successfully from S3`);
       } catch (error) {
         console.error(`Error deleting document ${imageKey} from S3:`, error);
-        return next(new AppError("Failed to delete existing document from S3.", 500));
+        return next(
+          new AppError("Failed to delete existing document from S3.", 500)
+        );
       }
     }
-  
+
     // Assign the new governmentInfo data
     user.draft.governmentInfo = data;
-  
+
     // Save the user
     await user.save();
   } else {
@@ -284,12 +285,12 @@ exports.sellerDraft = catchAsync(async (req, res, next) => {
       { $set: { [`draft.${draft}`]: data } },
       { new: true, runValidators: true }
     );
-  
+
     if (!user) {
       return next(new AppError("No user found with that ID.", 404));
     }
   }
-  
+
   if (!user) {
     return next(new AppError("No user found with that ID.", 404));
   }
@@ -318,9 +319,6 @@ exports.documentUpdate = catchAsync(async (req, res, next) => {
 
   // console.log(user,"user")
 
-
- 
-
   // Construct the new document URL
   const baseUrl = `https://dream-wedding.s3.eu-north-1.amazonaws.com/images/seller/`;
   const updateDocument = `${baseUrl}${document}`;
@@ -339,17 +337,15 @@ exports.documentUpdate = catchAsync(async (req, res, next) => {
 exports.sellerRequest = catchAsync(async (req, res, next) => {
   // Fetch user by ID
   // console.log("SdsdsdfsfS")
-  
+
   const user = await User.findById(req.params.id);
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 });
   }
 
-  let seller
+  let seller;
 
-  if(!user.sellerid){
-
-  
+  if (!user.sellerid) {
     // Destructure personal, important, and government information
     const {
       firstName,
@@ -363,18 +359,20 @@ exports.sellerRequest = catchAsync(async (req, res, next) => {
       state,
       whatsappNumber,
     } = user.draft?.personalInfo || {};
-  
+
     const {
       GSTNO,
-      bank = { name: undefined, account: undefined, reenterAccount: undefined, ifsc: undefined, holdername: undefined },
+      bank = {
+        name: undefined,
+        account: undefined,
+        reenterAccount: undefined,
+        ifsc: undefined,
+        holdername: undefined,
+      },
     } = user.draft?.importantInfo || {};
-  
-    const {
-      pancard,
-      document,
-      allowed,
-    } = user.draft?.governmentInfo || {};
-  
+
+    const { pancard, document, allowed } = user.draft?.governmentInfo || {};
+
     // Prepare the data for the Seller model
     const sellerData = {
       firstName,
@@ -401,28 +399,28 @@ exports.sellerRequest = catchAsync(async (req, res, next) => {
       userid: req.params.id,
     };
     // Create the seller record
-     seller = await Seller.create(sellerData);
-    
-      if (!seller) {
-        return next(new AppError("Error creating seller record", 500));
-      }
-      console.log(seller, "seller");
+    seller = await Seller.create(sellerData);
 
-      //Add seller id to user.sellerid
-      user.sellerid=seller._id;
-    }else{
-       await Seller.findByIdAndUpdate(
-        user.sellerid,
-        { status: "Pending" },
-        { new: true } // This option returns the updated document
-    );
+    if (!seller) {
+      return next(new AppError("Error creating seller record", 500));
     }
-      
-      // Update user status and save in one go
-      user.sellerRequest = "pending";
-      
-      await user.save();
-  
+    console.log(seller, "seller");
+
+    //Add seller id to user.sellerid
+    user.sellerid = seller._id;
+  } else {
+    await Seller.findByIdAndUpdate(
+      user.sellerid,
+      { status: "Pending" },
+      { new: true } // This option returns the updated document
+    );
+  }
+
+  // Update user status and save in one go
+  user.sellerRequest = "pending";
+
+  await user.save();
+
   // Send response
   res.status(200).json({
     status: "success",
@@ -431,27 +429,27 @@ exports.sellerRequest = catchAsync(async (req, res, next) => {
   });
 });
 
-
 exports.getWishlist = catchAsync(async (req, res, next) => {
   const id = req.user._id.toString(); // Get the user's ID
 
   // Find the user and populate the wishlist fields with corresponding data
   const user = await User.findById(id)
     .populate({
-      path: 'wishlist.Banquet',
-      select: 'name location services description price capacity rating gallery', // Select relevant fields from the Banquet model
+      path: "wishlist.Banquet",
+      select:
+        "name location services description price capacity rating gallery", // Select relevant fields from the Banquet model
     })
     .populate({
-      path: 'wishlist.Caterer',
-      select: 'name price services description location rating gallery', // Select relevant fields from the Caterer model
+      path: "wishlist.Caterer",
+      select: "name price services description location rating gallery", // Select relevant fields from the Caterer model
     })
     .populate({
-      path: 'wishlist.Photographer',
-      select: 'name services price description location rating gallery', // Select relevant fields from the Photographer model
+      path: "wishlist.Photographer",
+      select: "name services price description location rating gallery", // Select relevant fields from the Photographer model
     })
     .populate({
-      path: 'wishlist.Decorator',
-      select: 'name description price location rating gallery', // Select relevant fields from the Decorator model
+      path: "wishlist.Decorator",
+      select: "name description price location rating gallery", // Select relevant fields from the Decorator model
     });
 
   // Check if the user exists
@@ -464,6 +462,36 @@ exports.getWishlist = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       wishlist: user.wishlist,
+    },
+  });
+});
+
+exports.sellerpost = catchAsync(async (req, res, next) => {
+  const id = req.user._id.toString();
+  const user = await User.findById(id)
+    .populate({
+      path: "post.Banquet"
+    })
+    .populate({
+      path: "post.Caterer"
+    })
+    .populate({
+      path: "post.Photographer"
+    })
+    .populate({
+      path: "post.Decorator"
+    });
+
+  // Check if the user exists
+  if (!user) {
+    return res.status(404).json({ status: "error", message: "User not found" });
+  }
+
+  // Return the user's wishlist
+  res.status(200).json({
+    status: "success",
+    data: {
+      post: user.post,
     },
   });
 });
