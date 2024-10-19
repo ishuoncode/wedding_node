@@ -10,7 +10,6 @@ router.post("/signup", authController.signup);
 router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
-router.route("/visit/:category/:id").patch(utilsController.updateVisit);
 
 router.get(
   "/sellerpost",
@@ -75,6 +74,9 @@ router
   .route("/reviews/:category/:id")
   .get(authController.protect, utilsController.getMoreReviews);
 
-
+router
+  .route("/visit/:category/:id")
+  .patch(utilsController.updateVisit)
+  .get(utilsController.getVisitData);
 
 module.exports = router;

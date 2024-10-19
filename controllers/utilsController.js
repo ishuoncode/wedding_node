@@ -476,7 +476,7 @@ exports.getMoreReviews = catchAsync(async (req, res, next) => {
 });
 
 exports.updateVisit = catchAsync(async (req, res, next) => {
-  const { id, category } = req.params;
+  const { id: banquetId, category } = req.params; // Rename id to banquetId for clarity
 
   // Get the model based on the category
   const Model = visitModels[category];
@@ -489,9 +489,9 @@ exports.updateVisit = catchAsync(async (req, res, next) => {
   const currentYear = currentDate.getFullYear().toString(); // String for consistency
   const currentMonth = currentDate.toLocaleString("default", { month: "long" }); // Full month name
 
-  // Build the query to find the document by id and check for year and month
+  // Build the query to find the document by banquetId and check for year and month
   const query = {
-    _id: id, // Check for document with this ID
+    banquetId: banquetId, // Use banquetId from params
     "years.year": currentYear, // Check if the current year exists
     "years.monthlyVisits.month": currentMonth, // Check if the current month exists
   };
@@ -504,23 +504,23 @@ exports.updateVisit = catchAsync(async (req, res, next) => {
   // Array filters to update the matching year and month
   const options = {
     arrayFilters: [
-      { "yearElem.year": currentYear },
-      { "monthElem.month": currentMonth },
+      { "yearElem.year": currentYear }, // Match year
+      { "monthElem.month": currentMonth }, // Match month
     ],
     new: true, // Return the updated document
     upsert: false, // Don't create the document here, fallback to second step
   };
 
-  // First, try to find the document by ID and update the visit count
+  // First, try to find the document by banquetId and update the visit count
   const updatedItem = await Model.findOneAndUpdate(query, update, options);
 
   // If the document, year, or month doesn't exist, handle pushing them in a second step
   if (!updatedItem) {
     // Now handle creating the document, or adding the year/month if missing
-    await Model.findByIdAndUpdate(
-      id,
+    await Model.findOneAndUpdate(
+      { banquetId: banquetId }, // Ensure we match by banquetId
       {
-        $setOnInsert: { _id: id }, // Only set the id if creating a new document
+        $setOnInsert: { banquetId: banquetId }, // Only set the banquetId if creating a new document
         $push: {
           years: {
             year: currentYear,
@@ -539,3 +539,26 @@ exports.updateVisit = catchAsync(async (req, res, next) => {
 });
 
 
+
+exports.getVisitData = catchAsync(async (req, res, next) => {
+  const { id: banquetId, category } = req.params; // Extract banquetId and category from params
+
+  // Get the model based on the category
+  const Model = visitModels[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  // Find the document by banquetId
+  const visitData = await Model.findOne({ banquetId: banquetId });
+
+  // If no visit data is found, return an appropriate error message
+  if (!visitData) {
+    return next(new AppError(`No visit data found for banquetId: ${banquetId}`, 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: visitData, // Return the visit data
+  });
+});
