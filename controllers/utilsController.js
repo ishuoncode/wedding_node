@@ -7,6 +7,13 @@ const AppError = require("../utils/appError");
 const { uploadMultipleFiles, deleteMultipleFiles } = require("./awsController");
 const User = require("../models/userModal");
 
+const extractPart = (array) => {
+  return array.map((url) => {
+    const key = decodeURIComponent(url.split(".com/")[1]); // Extract the part after ".com/"
+    return key ? key : ""; // Return the extracted key or an empty string if not found
+  });
+};
+
 const models = {
   Banquet: require("../models/banquetModal"),
   Caterer: require("../models/catererModal"),
@@ -203,12 +210,17 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.deleteEntity = catchAsync(async (req, res, next) => {
   const { id, category } = req.params;
+  const userid = req.user._id.toString();
 
   // Dynamically select the model based on the category
   const Model = models[category];
-  if (!Model) {
+  const VisitModel = visitModels[category]; // Get the corresponding visit model
+ 
+
+  if (!Model || !VisitModel) {
     return next(new AppError(`No model found for category: ${category}`, 400));
   }
 
@@ -221,31 +233,19 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
   // Extract all photos from the entity's gallery
   const deleteImages = entity.gallery.flatMap((item) => item.photos);
 
+  // Delete images from S3 and the entity itself
   if (deleteImages && deleteImages.length > 0) {
-    // Extract S3 keys from deleteImages (URLs)
-    const extractPart = (array) => {
-      return array.map((url) => {
-        const key = decodeURIComponent(url.split(".com/")[1]); // Extract the part after ".com/"
-        return key ? key : ""; // Return the extracted key or an empty string if not found
-      });
-    };
+    const DeleteFolderImages = extractPart(deleteImages); // You would have your extractPart function here
 
-    const DeleteFolderImages = extractPart(deleteImages);
-    console.log(DeleteFolderImages, "Images to delete");
-
-    // Delete images from S3 if needed
     if (DeleteFolderImages && DeleteFolderImages.length > 0) {
       try {
-        await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Pass only the key prefix
+        await deleteMultipleFiles(DeleteFolderImages, `dream-wedding`); // Delete images from S3
+        await Model.findByIdAndDelete(id); // Delete the entity
 
-        // After successful deletion from S3, proceed to delete the entity
-        await Model.findByIdAndDelete(id);
-
-        // Send response
-        return res.status(204).json({
-          status: "success",
-          data: null,
-        });
+        // Check if the visit model has a banquetId field
+        if (VisitModel.schema.path('banquetId')) {
+          await VisitModel.deleteMany({ banquetId: id }); // Delete associated visit records
+        }
       } catch (err) {
         return next(new AppError("Failed to delete images from S3", 500));
       }
@@ -253,12 +253,31 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
   } else {
     // If no images to delete, directly delete the entity
     await Model.findByIdAndDelete(id);
-    return res.status(204).json({
-      status: "success",
-      data: null,
-    });
+
+    if (VisitModel.schema.path('banquetId')) {
+      await VisitModel.deleteMany({ banquetId: id }); // Delete associated visit records
+    }
   }
+
+  // Now find the user and update their post
+  const user = await User.findById(userid);
+  if (!user) {
+    return next(new AppError("User not found", 404));
+  }
+
+  // Check if the category exists in the user's post and remove the ID
+  if (user.post[category]) {
+    user.post[category] = user.post[category].filter(postId => postId.toString() !== id);
+    await user.save(); // Save the updated user document
+  }
+
+  return res.status(204).json({
+    status: "success",
+    data: null,
+  });
 });
+
+
 
 exports.addWishlist = catchAsync(async (req, res, next) => {
   // console.log("sdjskdjskdjdksdjksdjkjdsdksdksdssd");
