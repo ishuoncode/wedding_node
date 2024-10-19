@@ -14,6 +14,13 @@ const models = {
   Decorator: require("../models/decoratorModal"),
 };
 
+const visitModels = {
+  Banquet: require("../models/banquetVisit"),
+  Caterer: require("../models/catererVisit"),
+  Photographer: require("../models/photographerVisit"),
+  Decorator: require("../models/decoratorVisit"),
+};
+
 exports.buildFiltersAndSort = (query) => {
   const filters = {};
   let sort = {}; // To hold sorting criteria
@@ -332,10 +339,12 @@ exports.userReview = catchAsync(async (req, res, next) => {
   if (!Model) {
     return next(new AppError(`No model found for category: ${category}`, 400));
   }
-  
+
   // Check for mandatory fields
   if (!content || !rating || !username) {
-    return next(new AppError("Please provide content, rating, and username", 400));
+    return next(
+      new AppError("Please provide content, rating, and username", 400)
+    );
   }
 
   const item = await Model.findById(id);
@@ -362,7 +371,7 @@ exports.userReview = catchAsync(async (req, res, next) => {
       tag,
       content,
       rating,
-      username,  // Include username
+      username, // Include username
       userphoto, // Include userphoto (optional)
       date: new Date(),
     };
@@ -379,8 +388,6 @@ exports.userReview = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-
 
 exports.deleteReview = catchAsync(async (req, res, next) => {
   const userid = req.user._id.toString();
@@ -421,13 +428,18 @@ exports.deleteReview = catchAsync(async (req, res, next) => {
 
 exports.getMoreReviews = catchAsync(async (req, res, next) => {
   const { id, category } = req.params;
-  const { page = 1, limit = 10 } = req.query; 
+  const { page = 1, limit = 10 } = req.query;
 
   // Validate the inputs
   const pageNumber = parseInt(page, 10);
   const limitNumber = parseInt(limit, 10);
 
-  if (isNaN(pageNumber) || isNaN(limitNumber) || pageNumber <= 0 || limitNumber <= 0) {
+  if (
+    isNaN(pageNumber) ||
+    isNaN(limitNumber) ||
+    pageNumber <= 0 ||
+    limitNumber <= 0
+  ) {
     return next(new AppError("Invalid page or limit values", 400));
   }
 
@@ -439,12 +451,17 @@ exports.getMoreReviews = catchAsync(async (req, res, next) => {
 
   // Fetch the item and limit the number of reviews
   const item = await Model.findById(id)
-    .select('reviews')
-    .slice('reviews', [(pageNumber - 1) * limitNumber, limitNumber])
+    .select("reviews")
+    .slice("reviews", [(pageNumber - 1) * limitNumber, limitNumber])
     .lean();
 
   if (!item) {
-    return next(new AppError(`${category.charAt(0).toUpperCase() + category.slice(1)} not found`, 404));
+    return next(
+      new AppError(
+        `${category.charAt(0).toUpperCase() + category.slice(1)} not found`,
+        404
+      )
+    );
   }
 
   // Return the reviews
@@ -457,4 +474,68 @@ exports.getMoreReviews = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.updateVisit = catchAsync(async (req, res, next) => {
+  const { id, category } = req.params;
+
+  // Get the model based on the category
+  const Model = visitModels[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  // Get current year and month
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear().toString(); // String for consistency
+  const currentMonth = currentDate.toLocaleString("default", { month: "long" }); // Full month name
+
+  // Build the query to find the document by id and check for year and month
+  const query = {
+    _id: id, // Check for document with this ID
+    "years.year": currentYear, // Check if the current year exists
+    "years.monthlyVisits.month": currentMonth, // Check if the current month exists
+  };
+
+  // Use `$inc` to increase visits if the document exists
+  const update = {
+    $inc: { "years.$[yearElem].monthlyVisits.$[monthElem].visits": 1 },
+  };
+
+  // Array filters to update the matching year and month
+  const options = {
+    arrayFilters: [
+      { "yearElem.year": currentYear },
+      { "monthElem.month": currentMonth },
+    ],
+    new: true, // Return the updated document
+    upsert: false, // Don't create the document here, fallback to second step
+  };
+
+  // First, try to find the document by ID and update the visit count
+  const updatedItem = await Model.findOneAndUpdate(query, update, options);
+
+  // If the document, year, or month doesn't exist, handle pushing them in a second step
+  if (!updatedItem) {
+    // Now handle creating the document, or adding the year/month if missing
+    await Model.findByIdAndUpdate(
+      id,
+      {
+        $setOnInsert: { _id: id }, // Only set the id if creating a new document
+        $push: {
+          years: {
+            year: currentYear,
+            monthlyVisits: [{ month: currentMonth, visits: 1 }],
+          },
+        },
+      },
+      { new: true, upsert: true } // Create if not exists, return the new document
+    );
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: { updatedItem },
+  });
+});
+
 

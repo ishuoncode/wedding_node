@@ -10,6 +10,8 @@ router.post("/signup", authController.signup);
 router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
+router.route("/visit/:category/:id").patch(utilsController.updateVisit);
+
 router.get(
   "/sellerpost",
   authController.protect,
@@ -68,9 +70,11 @@ router
   .route("/userreview/:id")
   .post(authController.protect, utilsController.userReview)
   .delete(authController.protect, utilsController.deleteReview);
-  
+
 router
   .route("/reviews/:category/:id")
   .get(authController.protect, utilsController.getMoreReviews);
+
+
 
 module.exports = router;

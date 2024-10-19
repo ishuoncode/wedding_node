@@ -1,23 +1,31 @@
 const Photographer = require('../models/photographerModal');
+const Analytics = require("../models/analyticsModal");
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
 const AppError  = require("../utils/appError");
 const User = require('../models/userModal');
 
 exports.getAllPhotographer = catchAsync(async (req, res, next) => {
-    const { query } = req;
-    const { filters, sort } = buildFiltersAndSort(query);
+  const { query } = req;
+  const { filters, sort } = buildFiltersAndSort(query);
 
-    // Fetch banquet data based on filters and sorting
-    const photographer = await Photographer.find(filters).sort(sort);
+  // Fetch photographer data based on filters and sorting
+  const photographer = await Photographer.find(filters).sort(sort);
 
-    // If banquet data is successfully fetched, return success response
-    res.status(200).json({
+  // Update or create the analytics entry for the photographer view directly with event type
+  await Analytics.findOneAndUpdate(
+      { eventType: "Photographer" }, 
+      { $inc: { views: 1 } }, 
+      { upsert: true, new: true }
+  );
+
+  // If photographer data is successfully fetched, return success response
+  res.status(200).json({
       message: 'success',
       length: photographer.length,
       data: photographer,
-    });
-})
+  });
+});
 
 exports.getPhotographer = catchAsync(async (req, res, next) => {
   const photographer = await Photographer.findById(req.params.id)

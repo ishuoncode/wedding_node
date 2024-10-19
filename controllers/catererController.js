@@ -1,23 +1,32 @@
 const Caterer = require('../models/catererModal');
+const Analytics = require("../models/analyticsModal");
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
 const AppError  = require("../utils/appError");
 const User = require('../models/userModal');
 
+
 exports.getAllCaterer = catchAsync(async (req, res, next) => {
     const { query } = req;
     const { filters, sort } = buildFiltersAndSort(query);
 
-    // Fetch banquet data based on filters and sorting
+    // Fetch caterer data based on filters and sorting
     const caterer = await Caterer.find(filters).sort(sort);
 
-    // If banquet data is successfully fetched, return success response
+    // Update or create the analytics entry for the caterer view directly with event type
+    await Analytics.findOneAndUpdate(
+        { eventType: "Caterer" }, 
+        { $inc: { views: 1 } }, 
+        { upsert: true, new: true } 
+    );
+
+    // If caterer data is successfully fetched, return success response
     res.status(200).json({
-      message: 'success',
-      length: caterer.length,
-      data: caterer,
+        message: 'success',
+        length: caterer.length,
+        data: caterer,
     });
-})
+});
 
 exports.getCaterer = catchAsync(async (req, res, next) => {
   const caterer = await Caterer.findById(req.params.id)

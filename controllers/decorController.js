@@ -1,23 +1,34 @@
 const Decorator = require('../models/decoratorModal');
+const Analytics = require("../models/analyticsModal");
 const catchAsync = require('./../utils/catchAsync');
 const { buildFiltersAndSort } = require('./utilsController');
 const AppError  = require("../utils/appError");
 const User = require('../models/userModal');
 
+
+
 exports.getAllDecorator = catchAsync(async (req, res, next) => {
     const { query } = req;
     const { filters, sort } = buildFiltersAndSort(query);
 
-    // Fetch banquet data based on filters and sorting
+    // Fetch decorator data based on filters and sorting
     const decorator = await Decorator.find(filters).sort(sort);
 
-    // If banquet data is successfully fetched, return success response
+    // Update or create the analytics entry for the decorator view directly with event type
+    await Analytics.findOneAndUpdate(
+        { eventType: "Decorator" }, 
+        { $inc: { views: 1 } }, 
+        { upsert: true, new: true }
+    );
+
+    // If decorator data is successfully fetched, return success response
     res.status(200).json({
-      message: 'success',
-      length: decorator.length,
-      data: decorator,
+        message: 'success',
+        length: decorator.length,
+        data: decorator,
     });
-})
+});
+
 
 exports.getDecorator = catchAsync(async (req, res, next) => {
   const decorator = await Decorator.findById(req.params.id)

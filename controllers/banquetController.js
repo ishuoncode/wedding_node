@@ -1,4 +1,5 @@
 const Banquet = require("../models/banquetModal");
+const Analytics = require("../models/analyticsModal");
 const catchAsync = require("./../utils/catchAsync");
 const { buildFiltersAndSort } = require("./utilsController");
 const AppError = require("../utils/appError");
@@ -13,6 +14,13 @@ exports.getAllBanquet = catchAsync(async (req, res, next) => {
 
   // Fetch banquet data based on filters and sorting
   const banquet = await Banquet.find(filters).sort(sort);
+
+  // Update or create the analytics entry for the banquet view directly with event type
+  await Analytics.findOneAndUpdate(
+    { eventType: "Banquet" },
+    { $inc: { views: 1 } }, 
+    { upsert: true, new: true } 
+  );
 
   // If banquet data is successfully fetched, return success response
   res.status(200).json({
