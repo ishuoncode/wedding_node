@@ -1,4 +1,5 @@
 const User = require("../models/userModal");
+const Analytics = require("../models/analyticsModal");
 const Seller = require("../models/sellerModal");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
@@ -493,5 +494,18 @@ exports.sellerpost = catchAsync(async (req, res, next) => {
     data: {
       post: user.post,
     },
+  });
+});
+
+
+exports.getAnalytics = catchAsync(async (req, res, next) => {
+  // Fetch all analytics data
+  const data = await Analytics.find();
+
+  // Send response to the client
+  res.status(200).json({
+    status: "success",
+    results: data.length,
+    data: data,
   });
 });
