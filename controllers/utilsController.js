@@ -398,15 +398,24 @@ exports.userReview = catchAsync(async (req, res, next) => {
     item.reviews.unshift(newReview); // Add the new review at the 0 index
   }
 
+  // Calculate the average rating
+  const totalRatings = item.reviews.reduce((acc, review) => acc + review.rating, 0);
+  const avgRating = totalRatings / item.reviews.length;
+
+  // Save the calculated average rating to the avgRating field
+  item.rating = avgRating;
+
   await item.save();
 
   res.status(200).json({
     status: "success",
     data: {
       item,
+      rating, // Include the updated average rating in the response
     },
   });
 });
+
 
 exports.deleteReview = catchAsync(async (req, res, next) => {
   const userid = req.user._id.toString();
