@@ -615,9 +615,9 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
   // Search in all models concurrently with pagination
   const [banquets, caterers, photographers, decorators] = await Promise.all([
       models.Banquet.find(searchQuery).select('name location services description price capacity rating gallery').skip(skip).limit(limit),
-      models.Caterer.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
-      models.Photographer.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
-      models.Decorator.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
+      models.Caterer.find(searchQuery).select('name price services description location rating gallery').skip(skip).limit(limit),
+      models.Photographer.find(searchQuery).select('name services price description location rating gallery').skip(skip).limit(limit),
+      models.Decorator.find(searchQuery).select('name description price location rating gallery').skip(skip).limit(limit),
   ]);
 
   // Count total documents for pagination
