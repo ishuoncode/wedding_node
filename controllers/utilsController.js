@@ -590,3 +590,41 @@ exports.getVisitData = catchAsync(async (req, res, next) => {
     data: visitData, // Return the visit data
   });
 });
+
+exports.getGlobalSearch = catchAsync(async (req, res, next) => {
+  // Get the search term from the query
+  const searchTerm = req.query.search || '';
+
+  if (!searchTerm) {
+      return res.status(400).json({ message: 'Search term is required' });
+  }
+
+  // Define the search query to apply across models
+  const searchQuery = {
+      $or: [
+          { name: { $regex: searchTerm, $options: 'i' } }, // Search in the 'name' field
+          { description: { $regex: searchTerm, $options: 'i' } } // Or 'description' field
+      ]
+  };
+
+  // Search in all models concurrently using Promise.all
+  const [banquets, caterers, photographers, decorators] = await Promise.all([
+    models.Banquet.find(searchQuery).select("name location services description price capacity rating gallery"),
+    models.Caterer.find(searchQuery).select("name price services description location rating gallery"),
+    models.Photographer.find(searchQuery).select("name services price description location rating gallery"),
+    models.Decorator.find(searchQuery).select("name description price location rating gallery"),
+]);
+  // Combine the results
+  const results = {
+      banquets,
+      caterers,
+      photographers,
+      decorators,
+  };
+
+  // Send the response with the combined results
+  res.status(200).json({
+      status: 'success',
+      data: results,
+  });
+});

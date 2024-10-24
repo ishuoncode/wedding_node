@@ -11,6 +11,7 @@ router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
 router.get("/analytics",authController.protect,authController.restrictTo("admin"),userController.getAnalytics)
+router.get("/globalsearch",utilsController.getGlobalSearch)
 
 router.get(
   "/sellerpost",
