@@ -599,30 +599,49 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
       return res.status(400).json({ message: 'Search term is required' });
   }
 
-  // Define the search query to apply across models
+  // Get pagination parameters
+  const page = parseInt(req.query.page) || 1; // Default to 1 if not provided
+  const limit = parseInt(req.query.limit) || 10; // Default to 10 if not provided
+  const skip = (page - 1) * limit; // Calculate how many records to skip
+
+  // Define the search query
   const searchQuery = {
       $or: [
-          { name: { $regex: searchTerm, $options: 'i' } }, // Search in the 'name' field
-          { description: { $regex: searchTerm, $options: 'i' } } // Or 'description' field
+          { name: { $regex: searchTerm, $options: 'i' } },
+          { description: { $regex: searchTerm, $options: 'i' } }
       ]
   };
 
-  // Search in all models concurrently using Promise.all
+  // Search in all models concurrently with pagination
   const [banquets, caterers, photographers, decorators] = await Promise.all([
-    models.Banquet.find(searchQuery).select("name location services description price capacity rating gallery"),
-    models.Caterer.find(searchQuery).select("name price services description location rating gallery"),
-    models.Photographer.find(searchQuery).select("name services price description location rating gallery"),
-    models.Decorator.find(searchQuery).select("name description price location rating gallery"),
-]);
-  // Combine the results
+      models.Banquet.find(searchQuery).select('name location services description price capacity rating gallery').skip(skip).limit(limit),
+      models.Caterer.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
+      models.Photographer.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
+      models.Decorator.find(searchQuery).select('name services price rating').skip(skip).limit(limit),
+  ]);
+
+  // Count total documents for pagination
+  const [totalBanquets, totalCaterers, totalPhotographers, totalDecorators] = await Promise.all([
+      models.Banquet.countDocuments(searchQuery),
+      models.Caterer.countDocuments(searchQuery),
+      models.Photographer.countDocuments(searchQuery),
+      models.Decorator.countDocuments(searchQuery),
+  ]);
+
+  // Create an object to hold separate results and pagination info
   const results = {
       banquets,
       caterers,
       photographers,
       decorators,
+      pagination: {
+          currentPage: page,
+          totalPages: Math.ceil((totalBanquets + totalCaterers + totalPhotographers + totalDecorators) / limit), // Total pages based on all models
+          totalItems: totalBanquets + totalCaterers + totalPhotographers + totalDecorators, // Total items across all models
+      },
   };
 
-  // Send the response with the combined results
+  // Send the response with separate result sets and pagination info
   res.status(200).json({
       status: 'success',
       data: results,
