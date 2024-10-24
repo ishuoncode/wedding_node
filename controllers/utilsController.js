@@ -633,17 +633,18 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
       banquets,
       caterers,
       photographers,
-      decorators,
-      pagination: {
-          currentPage: page,
+      decorators
+  };
+  const pagination = {
+    currentPage: page,
           totalPages: Math.ceil((totalBanquets + totalCaterers + totalPhotographers + totalDecorators) / limit), // Total pages based on all models
           totalItems: totalBanquets + totalCaterers + totalPhotographers + totalDecorators, // Total items across all models
-      },
-  };
+  }
 
   // Send the response with separate result sets and pagination info
   res.status(200).json({
       status: 'success',
       data: results,
+      pagination
   });
 });
