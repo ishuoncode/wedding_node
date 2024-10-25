@@ -218,7 +218,6 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
   // Dynamically select the model based on the category
   const Model = models[category];
   const VisitModel = visitModels[category]; // Get the corresponding visit model
- 
 
   if (!Model || !VisitModel) {
     return next(new AppError(`No model found for category: ${category}`, 400));
@@ -243,7 +242,7 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
         await Model.findByIdAndDelete(id); // Delete the entity
 
         // Check if the visit model has a banquetId field
-        if (VisitModel.schema.path('banquetId')) {
+        if (VisitModel.schema.path("banquetId")) {
           await VisitModel.deleteMany({ banquetId: id }); // Delete associated visit records
         }
       } catch (err) {
@@ -254,7 +253,7 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
     // If no images to delete, directly delete the entity
     await Model.findByIdAndDelete(id);
 
-    if (VisitModel.schema.path('banquetId')) {
+    if (VisitModel.schema.path("banquetId")) {
       await VisitModel.deleteMany({ banquetId: id }); // Delete associated visit records
     }
   }
@@ -267,7 +266,9 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
 
   // Check if the category exists in the user's post and remove the ID
   if (user.post[category]) {
-    user.post[category] = user.post[category].filter(postId => postId.toString() !== id);
+    user.post[category] = user.post[category].filter(
+      (postId) => postId.toString() !== id
+    );
     await user.save(); // Save the updated user document
   }
 
@@ -276,8 +277,6 @@ exports.deleteEntity = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
-
-
 
 exports.addWishlist = catchAsync(async (req, res, next) => {
   // console.log("sdjskdjskdjdksdjksdjkjdsdksdksdssd");
@@ -399,7 +398,10 @@ exports.userReview = catchAsync(async (req, res, next) => {
   }
 
   // Calculate the average rating
-  const totalRatings = item.reviews.reduce((acc, review) => acc + review.rating, 0);
+  const totalRatings = item.reviews.reduce(
+    (acc, review) => acc + review.rating,
+    0
+  );
   const avgRating = totalRatings / item.reviews.length;
 
   // Save the calculated average rating to the avgRating field
@@ -415,7 +417,6 @@ exports.userReview = catchAsync(async (req, res, next) => {
     },
   });
 });
-
 
 exports.deleteReview = catchAsync(async (req, res, next) => {
   const userid = req.user._id.toString();
@@ -566,8 +567,6 @@ exports.updateVisit = catchAsync(async (req, res, next) => {
   });
 });
 
-
-
 exports.getVisitData = catchAsync(async (req, res, next) => {
   const { id: banquetId, category } = req.params; // Extract banquetId and category from params
 
@@ -582,7 +581,9 @@ exports.getVisitData = catchAsync(async (req, res, next) => {
 
   // If no visit data is found, return an appropriate error message
   if (!visitData) {
-    return next(new AppError(`No visit data found for banquetId: ${banquetId}`, 404));
+    return next(
+      new AppError(`No visit data found for banquetId: ${banquetId}`, 404)
+    );
   }
 
   res.status(200).json({
@@ -593,10 +594,10 @@ exports.getVisitData = catchAsync(async (req, res, next) => {
 
 exports.getGlobalSearch = catchAsync(async (req, res, next) => {
   // Get the search term from the query
-  const searchTerm = req.query.search || '';
+  const searchTerm = req.query.search || "";
 
   if (!searchTerm) {
-      return res.status(400).json({ message: 'Search term is required' });
+    return res.status(400).json({ message: "Search term is required" });
   }
 
   // Get pagination parameters
@@ -606,45 +607,62 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
 
   // Define the search query
   const searchQuery = {
-      $or: [
-          { name: { $regex: searchTerm, $options: 'i' } },
-          { description: { $regex: searchTerm, $options: 'i' } }
-      ]
+    $or: [
+      { name: { $regex: searchTerm, $options: "i" } },
+      { description: { $regex: searchTerm, $options: "i" } },
+    ],
   };
 
   // Search in all models concurrently with pagination
   const [banquets, caterers, photographers, decorators] = await Promise.all([
-      models.Banquet.find(searchQuery).select('name location services description price capacity rating gallery').skip(skip).limit(limit),
-      models.Caterer.find(searchQuery).select('name price services description location rating gallery').skip(skip).limit(limit),
-      models.Photographer.find(searchQuery).select('name services price description location rating gallery').skip(skip).limit(limit),
-      models.Decorator.find(searchQuery).select('name description price location rating gallery').skip(skip).limit(limit),
+    models.Banquet.find(searchQuery)
+      .select("name location  description price  ")
+      .skip(skip)
+      .limit(limit),
+    models.Caterer.find(searchQuery)
+      .select("name price  description location ")
+      .skip(skip)
+      .limit(limit),
+    models.Photographer.find(searchQuery)
+      .select("name  price description location ")
+      .skip(skip)
+      .limit(limit),
+    models.Decorator.find(searchQuery)
+      .select("name description price location ")
+      .skip(skip)
+      .limit(limit),
   ]);
 
   // Count total documents for pagination
-  const [totalBanquets, totalCaterers, totalPhotographers, totalDecorators] = await Promise.all([
+  const [totalBanquets, totalCaterers, totalPhotographers, totalDecorators] =
+    await Promise.all([
       models.Banquet.countDocuments(searchQuery),
       models.Caterer.countDocuments(searchQuery),
       models.Photographer.countDocuments(searchQuery),
       models.Decorator.countDocuments(searchQuery),
-  ]);
+    ]);
 
   // Create an object to hold separate results and pagination info
   const results = {
-      banquets,
-      caterers,
-      photographers,
-      decorators
+    banquets,
+    caterers,
+    photographers,
+    decorators,
   };
   const pagination = {
     currentPage: page,
-          totalPages: Math.ceil((totalBanquets + totalCaterers + totalPhotographers + totalDecorators) / limit), // Total pages based on all models
-          totalItems: totalBanquets + totalCaterers + totalPhotographers + totalDecorators, // Total items across all models
-  }
+    totalPages: Math.ceil(
+      (totalBanquets + totalCaterers + totalPhotographers + totalDecorators) /
+        limit
+    ), // Total pages based on all models
+    totalItems:
+      totalBanquets + totalCaterers + totalPhotographers + totalDecorators, // Total items across all models
+  };
 
   // Send the response with separate result sets and pagination info
   res.status(200).json({
-      status: 'success',
-      data: results,
-      pagination
+    status: "success",
+    data: results,
+    pagination,
   });
 });
