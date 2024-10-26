@@ -1,0 +1,89 @@
+const AppError = require("../utils/appError");
+const catchAsync = require('./../utils/catchAsync');
+const Appointment = require('../models/appointmentModal');
+
+
+
+exports.addBookAppointment = catchAsync(async (req, res, next) => {
+
+    const { categoryName, categoryId, timeSlot, name, phone, date } = req.body;
+  
+    // Create a new appointment
+    const newAppointment = await Appointment.create({
+      categoryName,
+      categoryId,
+      timeSlot,
+      name,
+      phone,
+      date
+    });
+  
+    // Send a response with the created appointment
+    res.status(201).json({
+      status: 'success',
+      data: {
+        appointment: newAppointment
+      }
+    });
+  });
+
+  
+  
+  exports.getAllAppointment = catchAsync(async (req, res, next) => {
+    // Determine the status from the query parameters, default to "pending"
+    const statusFilter = req.query.status === 'completed' ? 'completed' : 'pending';
+  
+    // Fetch appointments based on the determined status, sort by date (ascending), and populate the categoryId with the category name
+    const appointments = await Appointment.find({ status: statusFilter })
+      .sort({ date: 1 }) // Sort appointments by date in ascending order (earliest first)
+      .populate({
+        path: 'categoryId',
+        select: 'name'
+      });
+  
+    // Send the fetched appointments as a response
+    res.status(200).json({
+      status: 'success',
+      results: appointments.length,
+      data: {
+        appointments
+      }
+    });
+  });
+
+  exports.updateAppointmentStatus = catchAsync(async (req, res, next) => {
+    const { id } = req.params; // Get appointment ID from the request parameters
+    const { status } = req.body; // Get new status from the request body
+  
+    // Validate the status value
+    if (!['pending', 'completed'].includes(status)) {
+      return res.status(400).json({
+        status: 'fail',
+        message: 'Invalid status. Allowed values are "pending" or "completed".',
+      });
+    }
+  
+    // Update the appointment's status
+    const updatedAppointment = await Appointment.findByIdAndUpdate(
+      id,
+      { status }, // Set the new status
+      { new: true, runValidators: true } // Options to return the updated document and run validators
+    );
+  
+    // Check if the appointment was found and updated
+    if (!updatedAppointment) {
+      return res.status(404).json({
+        status: 'fail',
+        message: 'Appointment not found.',
+      });
+    }
+  
+    // Send the updated appointment as a response
+    res.status(200).json({
+      status: 'success',
+      data: {
+        appointment: updatedAppointment,
+      },
+    });
+  });
+  

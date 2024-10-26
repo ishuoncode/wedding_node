@@ -1,7 +1,4 @@
-// const Banquet = require('../models/banquetModal');
-// const Photographer = require('../models/photographerModal');
-// const Caterer = require('../models/catererModal');
-// const Decorator = require('../models/decoratorModal');
+
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const { uploadMultipleFiles, deleteMultipleFiles } = require("./awsController");
@@ -666,3 +663,4 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
     pagination,
   });
 });
+

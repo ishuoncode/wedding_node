@@ -1,4 +1,5 @@
 const User = require("../models/userModal");
+
 const Analytics = require("../models/analyticsModal");
 const Seller = require("../models/sellerModal");
 const AppError = require("../utils/appError");
@@ -509,3 +510,4 @@ exports.getAnalytics = catchAsync(async (req, res, next) => {
     data: data,
   });
 });
+

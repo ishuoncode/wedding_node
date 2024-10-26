@@ -82,4 +82,7 @@ router
   .patch(utilsController.updateVisit)
   .get(utilsController.getVisitData);
 
+
+
+
 module.exports = router;
