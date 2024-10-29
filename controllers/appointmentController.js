@@ -6,7 +6,7 @@ const Appointment = require('../models/appointmentModal');
 
 exports.addBookAppointment = catchAsync(async (req, res, next) => {
 
-    const { categoryName, categoryId, timeSlot, name, phone, date } = req.body;
+    const { categoryName, categoryId, timeSlot, name, phone, date,userId } = req.body;
   
     // Create a new appointment
     const newAppointment = await Appointment.create({
@@ -15,7 +15,8 @@ exports.addBookAppointment = catchAsync(async (req, res, next) => {
       timeSlot,
       name,
       phone,
-      date
+      date,
+      userId
     });
   
     // Send a response with the created appointment
@@ -39,6 +40,9 @@ exports.addBookAppointment = catchAsync(async (req, res, next) => {
       .populate({
         path: 'categoryId',
         select: 'name'
+      }).populate({
+        path: 'userId',
+        select: 'draft.personalInfo.firstName draft.personalInfo.middleName draft.personalInfo.lastName draft.personalInfo.phoneNumber'
       });
   
     // Send the fetched appointments as a response

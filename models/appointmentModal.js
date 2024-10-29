@@ -12,6 +12,11 @@ const appointmentSchema = new Schema({
     refPath: "categoryName",
     required: true,
   },
+  userId:{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   timeSlot: {
     type: String,
     required: true,
