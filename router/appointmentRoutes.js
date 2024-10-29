@@ -1,7 +1,7 @@
 const express = require("express");
 const authController = require("../controllers/authController.js");
 const appointmentController = require("../controllers/appointmentController.js");
-const utilsController = require("../controllers/utilsController.js");
+// const utilsController = require("../controllers/utilsController.js");
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router
 
 router.route("/updateappointment/:id").patch(
   authController.protect,
-  authController.restrictTo("admin"),
+  authController.restrictTo("admin", "seller"),
   appointmentController.updateAppointmentStatus
 );
 module.exports = router;
