@@ -1,13 +1,20 @@
 const AppError = require("../utils/appError");
 const catchAsync = require('./../utils/catchAsync');
 const Appointment = require('../models/appointmentModal');
+const User = require("../models/userModal");
 
 
 
 exports.addBookAppointment = catchAsync(async (req, res, next) => {
 
-    const { categoryName, categoryId, timeSlot, name, phone, date,userId } = req.body;
-  
+    const { categoryName, categoryId, timeSlot, name, phone, date } = req.body;
+    const queryField = `post.${categoryName}`;
+    const seller = await User.find({ [queryField]: { $in: categoryId } }).select('_id');
+    if (!seller || seller.length === 0) {
+        return next(new AppError('No sellers found for the given category and ID', 404));
+      }
+
+    
     // Create a new appointment
     const newAppointment = await Appointment.create({
       categoryName,
@@ -16,7 +23,7 @@ exports.addBookAppointment = catchAsync(async (req, res, next) => {
       name,
       phone,
       date,
-      userId
+      userId: seller[0]._id 
     });
   
     // Send a response with the created appointment
