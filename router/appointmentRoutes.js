@@ -10,7 +10,7 @@ router
   .post(appointmentController.addBookAppointment)
   .get(
     authController.protect,
-    authController.restrictTo("admin"),
+    authController.restrictTo("admin", "seller"),
     appointmentController.getAllAppointment
   );
 
