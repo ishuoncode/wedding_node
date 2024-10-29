@@ -40,19 +40,21 @@ exports.getAllAppointment = catchAsync(async (req, res, next) => {
   const statusFilter =
     req.query.status === "completed" ? "completed" : "pending";
   const userRole = req.user.role;
-
-  
-
-  console.log(userRole,"userRole")
-
+  const userid = req.user._id.toString();
+    
   let appointments;
   if (userRole === "seller") {
-    appointments = await Appointment.find({ status: statusFilter })
+    appointments = await Appointment.find({
+      status: statusFilter,
+     userId : userid,
+    })
       .sort({ date: 1 }) // Sort appointments by date in ascending order (earliest first)
       .populate({
         path: "categoryId",
         select: "name price",
       });
+
+    
   }
   if (userRole === "admin") {
     // Fetch appointments based on the determined status, sort by date (ascending), and populate the categoryId with the category name
