@@ -76,6 +76,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       yearOfEstd,
       contactUs,
       services,
+      whatsApp,
       occasion
     } = req.body;
   
@@ -88,6 +89,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       yearOfEstd,
       contactUs,
       services,
+      whatsApp,
       occasion
     });
 
@@ -117,6 +119,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       price,
       yearOfEstd,
       contactUs,
+      whatsApp,
       services,
       occasion
     } = req.body;
@@ -131,6 +134,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       ...(contactUs && { contactUs }),
       ...(services && { services }),
       ...(occasion && { occasion }),
+      ...(whatsApp && {whatsApp})
     };
   
     // Update the photographer entry if any fields are provided

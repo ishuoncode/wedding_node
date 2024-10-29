@@ -77,6 +77,7 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
       contactUs,
       location,
       price,
+      whatsApp,
       yearOfEstd
     } = req.body;
   
@@ -87,6 +88,7 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
       contactUs,
       location,
       price,
+      whatsApp,
       yearOfEstd
     });
 
@@ -115,6 +117,7 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
       contactUs,
       location,
       price,
+      whatsApp,
       yearOfEstd
     } = req.body;
   
@@ -126,6 +129,7 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
       ...(location && { location }),
       ...(price && { price }),
       ...(yearOfEstd && { yearOfEstd }),
+      ...(whatsApp && {whatsApp})
     };
   
     // Update the decorator entry if any fields are provided

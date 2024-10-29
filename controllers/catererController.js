@@ -80,6 +80,7 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
       basic,
       standard,
       deluxe,
+      whatsApp
     } = req.body;
   
     // Create a new caterer instance
@@ -91,6 +92,7 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
       billboard,
       photos,
       basic,
+      whatsApp,
       standard,
       deluxe,
     });
@@ -125,6 +127,7 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
       basic,
       standard,
       deluxe,
+      whatsApp
     } = req.body;
   
     // Build the update object dynamically based on fields provided in req.body
@@ -138,6 +141,7 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
       ...(basic && { basic }),
       ...(standard && { standard }),
       ...(deluxe && { deluxe }),
+      ...(whatsApp && {whatsApp})
     };
   
     // Update the caterer entry if any fields are provided

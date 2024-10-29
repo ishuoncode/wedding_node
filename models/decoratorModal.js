@@ -37,6 +37,10 @@ const decoratorSchema = new Schema({
   ],
   contactUs :{
     type: Number,
+    required: [true, 'contactUs is required'],
+    },
+    whatsApp:{
+      type: String,
     },
   yearOfEstd: Number,
 

@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
-const Review = require('./review'); 
+const Review = require("./review");
 
 const photographerSchema = new Schema({
   name: {
     type: String,
     lowercase: true,
-    required: [true, 'Name is required!'],
+    required: [true, "Name is required!"],
     maxlength: 40,
   },
   rating: {
@@ -14,14 +14,14 @@ const photographerSchema = new Schema({
     default: 4.5,
     min: 1,
     max: 5,
-    set: val => Math.round(val * 10) / 10 
+    set: (val) => Math.round(val * 10) / 10,
   },
   adminRating: {
     type: Number,
     select: false,
     min: 1,
     max: 5,
-    set: val => Math.round(val * 10) / 10 
+    set: (val) => Math.round(val * 10) / 10,
   },
   location: {
     city: { type: String, required: true },
@@ -38,12 +38,16 @@ const photographerSchema = new Schema({
   like: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'User', 
+      ref: "User",
     },
   ],
-  contactUs :{
+  contactUs: {
     type: Number,
-    },
+    required: [true, "contactUs is required"],
+  },
+  whatsApp: {
+    type: String,
+  },
   yearOfEstd: Number,
   services: [String],
   reviews: [Review.schema], // Using Review schema as a sub-document
@@ -67,5 +71,5 @@ const photographerSchema = new Schema({
   },
 });
 
-const Photographer = mongoose.model('Photographer', photographerSchema);
+const Photographer = mongoose.model("Photographer", photographerSchema);
 module.exports = Photographer;

@@ -126,6 +126,8 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     operatingDays,
     type,
     billboard,
+    whatsApp
+    
   } = req.body;
 
   // Create new banquet entry
@@ -142,6 +144,7 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     availability,
     openHours,
     operatingDays,
+    whatsApp,
     type,
     billboard,
   });
@@ -171,6 +174,7 @@ exports.patchBanquet = catchAsync(async (req, res, next) => {
     description,
     contactUs,
     price,
+    whatsApp,
     capacity,
     specialFeature,
     yearOfEstd,
@@ -197,6 +201,7 @@ exports.patchBanquet = catchAsync(async (req, res, next) => {
     ...(operatingDays && { operatingDays }),
     ...(type && { type }),
     ...(billboard && { billboard }),
+    ...(whatsApp && {whatsApp})
   };
 
   // Update the banquet entry if any fields are provided
