@@ -196,6 +196,10 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
     gallery.photos.push(...uploadedUrls);
   }
 
+  if (gallery.photos.length === 0) {
+    // Remove the gallery from the entity's gallery array
+    entity.gallery = entity.gallery.filter((item) => item._id.toString() !== folderid);
+  }
   // Save the updated entity
   await entity.save();
 
