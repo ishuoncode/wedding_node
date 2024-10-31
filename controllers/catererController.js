@@ -7,35 +7,50 @@ const User = require('../models/userModal');
 
 
 exports.getAllCaterer = catchAsync(async (req, res, next) => {
-    const { query } = req;
-    const { filters, sort } = buildFiltersAndSort(query);
+  const { query } = req;
+  const { filters, sort } = buildFiltersAndSort(query);
 
-    // Fetch caterer data based on filters and sorting
-    const caterer = await Caterer.find(filters).sort(sort);
+  // Fetch caterer data based on filters and sorting, including adminRating
+  const caterers = await Caterer.find(filters).sort(sort).select('+adminRating');
 
-    // Update or create the analytics entry for the caterer view directly with event type
-    await Analytics.findOneAndUpdate(
-        { eventType: "Caterer" }, 
-        { $inc: { views: 1 } }, 
-        { upsert: true, new: true } 
-    );
+  // Update the caterer objects to replace rating with adminRating if it exists
+  const updatedCaterers = caterers.map(caterer => {
+      if (caterer.adminRating) {
+          caterer.rating = caterer.adminRating; // Use adminRating as the rating
+          delete caterer.adminRating; // Remove adminRating from the response
+      }
+      return caterer;
+  });
 
-    // If caterer data is successfully fetched, return success response
-    res.status(200).json({
-        message: 'success',
-        length: caterer.length,
-        data: caterer,
-    });
+  // Update or create the analytics entry for the caterer view directly with event type
+  await Analytics.findOneAndUpdate(
+      { eventType: "Caterer" }, 
+      { $inc: { views: 1 } }, 
+      { upsert: true, new: true } 
+  );
+
+  // If caterer data is successfully fetched, return success response
+  res.status(200).json({
+      message: 'success',
+      length: updatedCaterers.length,
+      data: updatedCaterers,
+  });
 });
 
 exports.getCaterer = catchAsync(async (req, res, next) => {
   const caterer = await Caterer.findById(req.params.id)
-      .select('-reviews') // Exclude reviews initially
+      .select('-reviews +adminRating') // Exclude reviews and include adminRating
       .lean(); // Convert the document to a plain JavaScript object for better performance
 
   // Check if caterer is found
   if (!caterer) {
       return next(new AppError('Caterer not found', 404));
+  }
+
+  // Replace rating with adminRating if it exists and remove adminRating from the response
+  if (caterer.adminRating) {
+      caterer.rating = caterer.adminRating; // Use adminRating as the rating
+      delete caterer.adminRating; // Remove adminRating from the response
   }
 
   // Fetch only the first 10 reviews separately if there are any reviews
@@ -55,6 +70,7 @@ exports.getCaterer = catchAsync(async (req, res, next) => {
       data: caterer,
   });
 });
+
 
 
 // exports.deleteCaterer = catchAsync(async (req, res, next) => {

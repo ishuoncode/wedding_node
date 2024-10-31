@@ -10,7 +10,16 @@ exports.getAllPhotographer = catchAsync(async (req, res, next) => {
   const { filters, sort } = buildFiltersAndSort(query);
 
   // Fetch photographer data based on filters and sorting
-  const photographer = await Photographer.find(filters).sort(sort);
+  const photographers = await Photographer.find(filters).sort(sort).select("+adminRating"); // Include adminRating for processing
+
+  // Update adminRating to rating and remove adminRating from response
+  const updatedPhotographers = photographers.map((photographer) => {
+      if (photographer.adminRating) {
+          photographer.rating = photographer.adminRating; // Use adminRating as the rating
+          delete photographer.adminRating; // Remove adminRating from the response
+      }
+      return photographer;
+  });
 
   // Update or create the analytics entry for the photographer view directly with event type
   await Analytics.findOneAndUpdate(
@@ -22,19 +31,25 @@ exports.getAllPhotographer = catchAsync(async (req, res, next) => {
   // If photographer data is successfully fetched, return success response
   res.status(200).json({
       message: 'success',
-      length: photographer.length,
-      data: photographer,
+      length: updatedPhotographers.length,
+      data: updatedPhotographers,
   });
 });
 
 exports.getPhotographer = catchAsync(async (req, res, next) => {
   const photographer = await Photographer.findById(req.params.id)
-      .select('-reviews') // Exclude reviews initially
+      .select('-reviews +adminRating') // Exclude reviews and include adminRating for processing
       .lean(); // Convert the document to a plain JavaScript object for better performance
 
   // Check if photographer is found
   if (!photographer) {
       return next(new AppError('Photographer not found', 404));
+  }
+
+  // Replace rating with adminRating if it exists and remove adminRating from the response
+  if (photographer.adminRating) {
+      photographer.rating = photographer.adminRating; // Use adminRating as the rating
+      delete photographer.adminRating; // Remove adminRating from the response
   }
 
   // Fetch only the first 10 reviews separately if there are any reviews
@@ -54,6 +69,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       data: photographer,
   });
 });
+
 
 
 // exports.deletePhotographer = catchAsync(async (req, res, next) => {

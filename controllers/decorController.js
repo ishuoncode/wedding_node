@@ -8,36 +8,50 @@ const User = require('../models/userModal');
 
 
 exports.getAllDecorator = catchAsync(async (req, res, next) => {
-    const { query } = req;
-    const { filters, sort } = buildFiltersAndSort(query);
+  const { query } = req;
+  const { filters, sort } = buildFiltersAndSort(query);
 
-    // Fetch decorator data based on filters and sorting
-    const decorator = await Decorator.find(filters).sort(sort);
+  // Fetch decorator data based on filters and sorting
+  const decorators = await Decorator.find(filters).sort(sort).select("+adminRating"); // Include adminRating for processing
 
-    // Update or create the analytics entry for the decorator view directly with event type
-    await Analytics.findOneAndUpdate(
-        { eventType: "Decorator" }, 
-        { $inc: { views: 1 } }, 
-        { upsert: true, new: true }
-    );
+  // Update adminRating to rating and remove adminRating from response
+  const updatedDecorators = decorators.map((decorator) => {
+      if (decorator.adminRating) {
+          decorator.rating = decorator.adminRating; // Use adminRating as the rating
+          delete decorator.adminRating; // Remove adminRating from the response
+      }
+      return decorator;
+  });
 
-    // If decorator data is successfully fetched, return success response
-    res.status(200).json({
-        message: 'success',
-        length: decorator.length,
-        data: decorator,
-    });
+  // Update or create the analytics entry for the decorator view directly with event type
+  await Analytics.findOneAndUpdate(
+      { eventType: "Decorator" }, 
+      { $inc: { views: 1 } }, 
+      { upsert: true, new: true }
+  );
+
+  // If decorator data is successfully fetched, return success response
+  res.status(200).json({
+      message: 'success',
+      length: updatedDecorators.length,
+      data: updatedDecorators,
+  });
 });
-
 
 exports.getDecorator = catchAsync(async (req, res, next) => {
   const decorator = await Decorator.findById(req.params.id)
-      .select('-reviews') // Exclude reviews initially
+      .select('-reviews +adminRating') // Exclude reviews and include adminRating for processing
       .lean(); // Convert the document to a plain JavaScript object for better performance
 
   // Check if decorator is found
   if (!decorator) {
       return next(new AppError('Decorator not found', 404));
+  }
+
+  // Replace rating with adminRating if it exists and remove adminRating from the response
+  if (decorator.adminRating) {
+      decorator.rating = decorator.adminRating; // Use adminRating as the rating
+      delete decorator.adminRating; // Remove adminRating from the response
   }
 
   // Fetch only the first 10 reviews separately if there are any reviews
@@ -57,6 +71,7 @@ exports.getDecorator = catchAsync(async (req, res, next) => {
       data: decorator,
   });
 });
+
 
 
 // exports.deleteDecorator = catchAsync(async (req, res, next) => {
