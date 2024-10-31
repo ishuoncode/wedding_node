@@ -17,7 +17,7 @@ const modelsMap = {
 exports.getAdminRating = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const { name } = req.query; // Model name from query parameter
-    console.log(id,name)
+  console.log(id,name)
   // Check if the model name is valid
   if (!name || !modelsMap[name]) {
     return next(new AppError("Invalid model name provided", 400));

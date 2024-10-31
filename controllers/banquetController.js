@@ -13,25 +13,39 @@ exports.getAllBanquet = catchAsync(async (req, res, next) => {
   const { filters, sort } = buildFiltersAndSort(query);
 
   // Fetch banquet data based on filters and sorting
-  const banquet = await Banquet.find(filters).sort(sort);
+  const banquets = await Banquet.find(filters)
+    .sort(sort)
+    .select("+adminRating"); 
 
-  // Update or create the analytics entry for the banquet view directly with event type
+  // Modify the response by using adminRating for rating where applicable and removing adminRating from the response
+  const updatedBanquets = banquets.map((banquet) => {
+    const banquetObj = banquet.toObject(); 
+    if (banquetObj.adminRating) {
+      banquetObj.rating = banquetObj.adminRating; 
+    }
+    delete banquetObj.adminRating;
+    return banquetObj; 
+  });
+
+  // Fetch analytics data without updating (if needed)
   await Analytics.findOneAndUpdate(
     { eventType: "Banquet" },
     { $inc: { views: 1 } }, 
-    { upsert: true, new: true } 
+    { upsert: true, new: true }
   );
 
-  // If banquet data is successfully fetched, return success response
+  // Send the response
   res.status(200).json({
     message: "success",
-    length: banquet.length,
-    data: banquet,
+    length: updatedBanquets.length,
+    data: updatedBanquets,
   });
 });
 
+
+
 exports.getBanquet = catchAsync(async (req, res, next) => {
-  const banquet = await Banquet.findById(req.params.id)
+  const banquet = await Banquet.findById(req.params.id).select('-reviews +adminRating')
     .select('-reviews') // Exclude reviews initially
     .lean(); // Convert the document to a plain JavaScript object for better performance
 
@@ -39,7 +53,10 @@ exports.getBanquet = catchAsync(async (req, res, next) => {
   if (!banquet) {
     return next(new AppError("Banquet not found", 404));
   }
-
+  if (banquet.adminRating) {
+    banquet.rating = banquet.adminRating; // Use adminRating as the rating
+    delete banquet.adminRating; 
+  }
   // Fetch only the first 10 reviews separately if there are any reviews
   const reviews = await Banquet.findById(req.params.id)
     .select('reviews')
