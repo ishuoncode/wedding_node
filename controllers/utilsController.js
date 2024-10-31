@@ -134,7 +134,7 @@ exports.addNewFolder = catchAsync(async (req, res, next) => {
 
 exports.patchFolder = catchAsync(async (req, res, next) => {
   const { id, folderid } = req.params;
-  const { deleteImageArray, category } = req.body; // Extract deleteImageArray from request body
+  const { deleteImageArray, category ,name } = req.body; // Extract deleteImageArray from request body
 
   // Dynamically select the model based on the category
   const Model = models[category];
@@ -196,6 +196,9 @@ exports.patchFolder = catchAsync(async (req, res, next) => {
     gallery.photos.push(...uploadedUrls);
   }
 
+  if(name){
+    gallery.name=name
+  }
   if (gallery.photos.length === 0) {
     // Remove the gallery from the entity's gallery array
     entity.gallery = entity.gallery.filter((item) => item._id.toString() !== folderid);
