@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModal');
 const AppError = require('./../utils/appError');
+const Email = require('../utils/email');
+const { createHash } = require('crypto');
 const catchAsync = require('./../utils/catchAsync');
 const { promisify } = require('util');
 
@@ -66,6 +68,68 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   createSendToken(user, 201, req, res);
 });
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user.id).select('+password');
+
+  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+    return next(new AppError('Your current password is Wrong', 401));
+  }
+
+  user.password = req.body.password;
+
+  await user.save();
+
+  createSendToken(user, 200, req, res);
+})
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email }).select("email name");
+  if (!user) {
+    return next(
+      new AppError('User does not exist with this Email address.', 404),
+    );
+  }
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+  const resetURL = `${process.env.FRONTEND_URL}/resetPassword/${resetToken}`;
+  try {
+    await new Email(user, resetURL).sendPasswordReset();
+    res.status(200).json({
+      status: 'success',
+      message: 'Token send to  email',
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(
+      new AppError(
+        'There was an Error sending the email. Try again later .',
+        500,
+      ),
+    );
+  }
+})
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const hashedToken = createHash('sha256')
+  .update(req.params.token)
+  .digest('hex');
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  }).select("password");
+  if (!user) {
+    return next(new AppError('Token is invalid or has Expired', 400));
+  }
+  user.password = req.body.password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+  createSendToken(user, 200, req, res);
+})
+
 
 exports.protect = catchAsync(async (req, res, next) => {
   let token;

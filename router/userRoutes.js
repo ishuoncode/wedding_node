@@ -7,13 +7,25 @@ const router = express.Router();
 
 router.post("/login", authController.login);
 router.post("/signup", authController.signup);
+router.post('/forgotPassword', authController.forgotPassword);
+router.patch('/resetPassword/:token', authController.resetPassword);
 router.get("/verify", authController.isLoggedIn);
 router.post("/uploadPhoto", userController.presigned);
 router.post("/uploadDocs", userController.presignedDocs);
-router.get("/globalsearch",utilsController.getGlobalSearch)
+router.get("/globalsearch", utilsController.getGlobalSearch);
 
-router.get("/analytics",authController.protect,authController.restrictTo("admin"),userController.getAnalytics)
-
+router.get(
+  "/analytics",
+  authController.protect,
+  authController.restrictTo("admin"),
+  userController.getAnalytics
+);
+router.patch(
+  "/updateMyPassword",
+  authController.protect,
+  authController.restrictTo("seller", "user"),
+  authController.updatePassword
+);
 router.get(
   "/sellerpost",
   authController.protect,
@@ -81,8 +93,5 @@ router
   .route("/visit/:category/:id")
   .patch(utilsController.updateVisit)
   .get(utilsController.getVisitData);
-
-
-
 
 module.exports = router;

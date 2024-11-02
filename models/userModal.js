@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const argon2 = require("argon2");
+const { randomBytes,createHash } = require("crypto");
 const { Schema } = mongoose;
 
 const bankSchema = new mongoose.Schema({
@@ -207,9 +208,8 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
 };
 
 userSchema.methods.createPasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(32).toString("hex");
-  this.passwordResetToken = crypto
-    .createHash("sha256")
+  const resetToken = randomBytes(32).toString("hex");
+  this.passwordResetToken = createHash("sha256")
     .update(resetToken)
     .digest("hex");
   // console.log(this.passwordResetToken, { resetToken });
