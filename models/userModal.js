@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const argon2 = require("argon2");
-const { randomBytes,createHash } = require("crypto");
+const { randomBytes, createHash } = require("crypto");
 const { Schema } = mongoose;
 
 const bankSchema = new mongoose.Schema({
@@ -137,29 +137,54 @@ const userSchema = new mongoose.Schema({
     },
   },
   post: {
-    Banquet: [{ type: Schema.Types.ObjectId, ref: "Banquet", unique: true }],
-    Decorator: [
-      { type: Schema.Types.ObjectId, ref: "Decorator", unique: true },
-    ],
-    Caterer: [{ type: Schema.Types.ObjectId, ref: "Caterer", unique: true }],
-    Photographer: [
-      { type: Schema.Types.ObjectId, ref: "Photographer", unique: true },
-    ],
+    Banquet: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Banquet" }],
+      default: [],
+      unique: true,
+    },
+    Decorator: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Decorator" }],
+      default: [],
+      unique: true,
+    },
+    Caterer: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Caterer" }],
+      default: [],
+      unique: true,
+    },
+    Photographer: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Photographer" }],
+      default: [],
+      unique: true,
+    },
   },
+
   wishlist: {
-    Banquet: [{ type: Schema.Types.ObjectId, ref: "Banquet", unique: true }],
-    Decorator: [
-      { type: Schema.Types.ObjectId, ref: "Decorator", unique: true },
-    ],
-    Caterer: [{ type: Schema.Types.ObjectId, ref: "Caterer", unique: true }],
-    Photographer: [
-      { type: Schema.Types.ObjectId, ref: "Photographer", unique: true },
-    ],
+    Banquet: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Banquet" }],
+      default: [],
+      unique: true,
+    },
+    Decorator: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Decorator" }],
+      default: [],
+      unique: true,
+    },
+    Caterer: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Caterer" }],
+      default: [],
+      unique: true,
+    },
+    Photographer: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Photographer" }],
+      default: [],
+      unique: true,
+    },
   },
   sellerid: {
     type: Schema.Types.ObjectId,
-    ref: "Seller", // Corrected the ref to be a string
-    unique: true,
+    ref: "Seller",
+    unique:true
   },
   googleLogIn: {
     type: Boolean,
