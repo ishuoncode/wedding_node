@@ -140,22 +140,22 @@ const userSchema = new mongoose.Schema({
     Banquet: {
       type: [{ type: Schema.Types.ObjectId, ref: "Banquet" }],
       default: [],
-      unique: true,
+
     },
     Decorator: {
       type: [{ type: Schema.Types.ObjectId, ref: "Decorator" }],
       default: [],
-      unique: true,
+     
     },
     Caterer: {
       type: [{ type: Schema.Types.ObjectId, ref: "Caterer" }],
       default: [],
-      unique: true,
+    
     },
     Photographer: {
       type: [{ type: Schema.Types.ObjectId, ref: "Photographer" }],
       default: [],
-      unique: true,
+
     },
   },
 
