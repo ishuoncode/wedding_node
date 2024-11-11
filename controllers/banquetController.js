@@ -143,7 +143,10 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     operatingDays,
     type,
     billboard,
-    whatsApp
+    whatsApp,
+    decoratorPrice,
+    photographerPrice,
+    caterer
     
   } = req.body;
 
@@ -164,6 +167,9 @@ exports.createBanquet = catchAsync(async (req, res, next) => {
     whatsApp,
     type,
     billboard,
+    decoratorPrice,
+    photographerPrice,
+    caterer
   });
 
   await User.findByIdAndUpdate(
@@ -200,6 +206,9 @@ exports.patchBanquet = catchAsync(async (req, res, next) => {
     operatingDays,
     type,
     billboard,
+    decoratorPrice,
+    photographerPrice,
+    caterer
   } = req.body;
 
   // Create the update object with only non-null fields from req.body
@@ -218,7 +227,10 @@ exports.patchBanquet = catchAsync(async (req, res, next) => {
     ...(operatingDays && { operatingDays }),
     ...(type && { type }),
     ...(billboard && { billboard }),
-    ...(whatsApp && {whatsApp})
+    ...(whatsApp && {whatsApp}),
+    ...(decoratorPrice && {decoratorPrice}),
+    ...(photographerPrice && {photographerPrice}),
+    ...(caterer && {caterer})
   };
 
   // Update the banquet entry if any fields are provided
