@@ -60,6 +60,7 @@ const decoratorSchema = new Schema({
       photos: [String],
     },
   ],
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Decorator = mongoose.model('Decorator', decoratorSchema);

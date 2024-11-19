@@ -71,7 +71,7 @@ const banquetSchema = new Schema({
     // required: [true, 'contactUs is required'],
   },
   whatsApp: {
-    type: String,
+    type: Number,
   },
   price: {
     type: Number,
@@ -135,6 +135,7 @@ const banquetSchema = new Schema({
       photos: [String],
     },
   ],
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Index for geospatial queries

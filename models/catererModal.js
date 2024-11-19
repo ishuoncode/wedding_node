@@ -87,7 +87,8 @@ const catererSchema = new Schema({
   ],
   basic: sectionSchema,    
   standard: sectionSchema, 
-  deluxe: sectionSchema,  
+  deluxe: sectionSchema, 
+  createdAt: { type: Date, default: Date.now }, 
 });
 
 const Caterer = mongoose.model("Caterer", catererSchema);

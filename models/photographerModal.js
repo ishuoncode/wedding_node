@@ -69,6 +69,7 @@ const photographerSchema = new Schema({
     type: [String],
     default: [],
   },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Photographer = mongoose.model("Photographer", photographerSchema);
