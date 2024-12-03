@@ -106,15 +106,6 @@ const banquetSchema = new Schema({
     enum: ["AC", "Non-AC"],
     default: "AC",
   },
-  availability: {
-    type: [String],
-    validate: {
-      validator: function (array) {
-        return array.length > 0;
-      },
-      message: "At least one availability is required",
-    },
-  },
   reviews: [Review.schema],
   billboard: {
     type: String,
