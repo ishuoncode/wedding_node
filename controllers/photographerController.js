@@ -89,6 +89,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       description,
       location,
       price,
+      feature,
       yearOfEstd,
       contactUs,
       services,
@@ -102,6 +103,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       description,
       location,
       price,
+      feature,
       yearOfEstd,
       contactUs,
       services,
@@ -133,6 +135,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       description,
       location,
       price,
+      feature,
       yearOfEstd,
       contactUs,
       whatsApp,
@@ -149,6 +152,7 @@ exports.getPhotographer = catchAsync(async (req, res, next) => {
       ...(yearOfEstd && { yearOfEstd }),
       ...(contactUs && { contactUs }),
       ...(services && { services }),
+      ...(feature && { feature }),
       ...(occasion && { occasion }),
       ...(whatsApp && {whatsApp})
     };
