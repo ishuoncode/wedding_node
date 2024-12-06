@@ -5,6 +5,8 @@ const Photographer = require('../models/photographerModal');
 const AppError = require("../utils/appError");
 const catchAsync = require('./../utils/catchAsync');
 
+
+
 // Map to store models for dynamic model referencing
 const modelsMap = {
   Banquet,
