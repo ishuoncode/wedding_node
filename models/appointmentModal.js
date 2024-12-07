@@ -17,10 +17,6 @@ const appointmentSchema = new Schema({
     ref: 'User',
     required: true,
   },
-  timeSlot: {
-    type: String,
-    required: true,
-  },
   status: {
     type: String,
     enum: ["pending", "completed"],
@@ -34,7 +30,11 @@ const appointmentSchema = new Schema({
     type: String,
     required: true,
   },
-  date: {
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate:{
     type: Date,
     required: true,
   },

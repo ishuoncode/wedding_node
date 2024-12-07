@@ -4,7 +4,7 @@ const Appointment = require("../models/appointmentModal");
 const User = require("../models/userModal");
 
 exports.addBookAppointment = catchAsync(async (req, res, next) => {
-  const { categoryName, categoryId, timeSlot, name, phone, date } = req.body;
+  const { categoryName, categoryId, name, phone, startDate , endDate } = req.body;
   const queryField = `post.${categoryName}`;
   const seller = await User.find({ [queryField]: { $in: categoryId } }).select(
     "_id"
@@ -22,7 +22,8 @@ exports.addBookAppointment = catchAsync(async (req, res, next) => {
     timeSlot,
     name,
     phone,
-    date,
+    startDate,
+    endDate,
     userId: seller[0]._id,
   });
 
@@ -48,7 +49,7 @@ exports.getAllAppointment = catchAsync(async (req, res, next) => {
       status: statusFilter,
      userId : userid,
     })
-      .sort({ date: 1 }) // Sort appointments by date in ascending order (earliest first)
+      .sort({ startDate: 1 }) 
       .populate({
         path: "categoryId",
         select: "name price",
@@ -59,7 +60,7 @@ exports.getAllAppointment = catchAsync(async (req, res, next) => {
   if (userRole === "admin") {
     // Fetch appointments based on the determined status, sort by date (ascending), and populate the categoryId with the category name
     appointments = await Appointment.find({ status: statusFilter })
-      .sort({ date: 1 }) // Sort appointments by date in ascending order (earliest first)
+      .sort({ startDate: 1 }) // Sort appointments by date in ascending order (earliest first)
       .populate({
         path: "categoryId",
         select: "name price",
