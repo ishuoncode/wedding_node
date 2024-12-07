@@ -99,7 +99,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true, // Trims any leading/trailing whitespace
 
-    required: [true, "Phone number is required"],
+    // required: [true, "Phone number is required"],
   },
   password: {
     type: String,

@@ -12,7 +12,8 @@ const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
-
+const passport =require("./utils/passport");
+const AuthRoutes = require("./router/authRoutes");
 const UserRoutes = require('./router/userRoutes');
 const DecorRoutes = require('./router/decorRoutes');
 const BanquetRoutes = require('./router/banquetRoutes');
@@ -36,6 +37,7 @@ if (process.env.NODE_ENV === 'development') {
   }
   app.use(cookieParser('secret'));
   app.use(express.json());
+  passport(app);
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(helmet());
 app.use((req, res, next) => {
@@ -52,15 +54,16 @@ const limiter = rateLimit({
   });
   app.use('/api', limiter);
   app.use(cors({ credentials: true, origin: true }));  
-
+  
+app.use('/api/auth',AuthRoutes);
 app.use('/api/user', UserRoutes);
 app.use('/api/decor', DecorRoutes);
 app.use('/api/banquet', BanquetRoutes);
 app.use('/api/photographer', PhotographerRoutes);
 app.use('/api/seller', SellerRoutes);
-app.use('/api/caterer', CatererRoutes)
-app.use('/api/adminRating', AdminRatingRoutes)
-app.use('/api/appointment', AppointmentRoutes)
+app.use('/api/caterer', CatererRoutes);
+app.use('/api/adminRating', AdminRatingRoutes);
+app.use('/api/appointment', AppointmentRoutes);
 
 
 app.all('*', (req, res, next) => {
