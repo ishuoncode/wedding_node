@@ -19,7 +19,6 @@ exports.addBookAppointment = catchAsync(async (req, res, next) => {
   const newAppointment = await Appointment.create({
     categoryName,
     categoryId,
-    timeSlot,
     name,
     phone,
     startDate,
