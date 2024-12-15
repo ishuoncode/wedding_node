@@ -61,7 +61,6 @@ const personalInfoSchema = new mongoose.Schema({
 const importantInfoSchema = new mongoose.Schema({
   GSTNO: {
     type: String,
-    required: true,
   },
   bank: {
     type: bankSchema,
