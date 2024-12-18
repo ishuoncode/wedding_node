@@ -30,7 +30,7 @@ const photographerSchema = new Schema({
   },
   locationUrl: String,
   description: String,
-  feature: [String],
+  specialFeatures: [String],
   price: {
     type: [Number],
     default: [],
