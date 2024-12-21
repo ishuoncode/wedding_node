@@ -22,6 +22,7 @@ const SellerRoutes = require('./router/sellerRoutes');
 const CatererRoutes = require('./router/catererRoutes');
 const AdminRatingRoutes = require('./router/adminRatingRoutes');
 const AppointmentRoutes = require('./router/appointmentRoutes');
+const AdminRoutes = require('./router/adminRoutes');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -64,6 +65,7 @@ app.use('/api/seller', SellerRoutes);
 app.use('/api/caterer', CatererRoutes);
 app.use('/api/adminRating', AdminRatingRoutes);
 app.use('/api/appointment', AppointmentRoutes);
+app.use('/api/admin',AdminRoutes);
 
 
 app.all('*', (req, res, next) => {
