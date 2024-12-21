@@ -183,8 +183,8 @@ const userSchema = new mongoose.Schema({
   sellerid: {
     type: Schema.Types.ObjectId,
     ref: "Seller",
-    unique:true
   },
+
   googleLogIn: {
     type: Boolean,
     default: false,
