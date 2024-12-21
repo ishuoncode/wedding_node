@@ -9,6 +9,7 @@ const banquetSchema = new Schema({
       maxlength: 255,
     },
   ],
+  billboard:String,
   name: {
     type: String,
     lowercase: true,

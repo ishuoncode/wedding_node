@@ -9,6 +9,7 @@ const photographerSchema = new Schema({
     required: [true, "Name is required!"],
     maxlength: 40,
   },
+  billboard:String,
   rating: {
     type: Number,
     default: 4.5,

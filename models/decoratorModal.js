@@ -10,6 +10,7 @@ const decoratorSchema = new Schema({
     required: [true, 'Name is required!'],
     maxlength: 40,
   },
+  billboard:String,
   description: String,
   rating: {
     type: Number,

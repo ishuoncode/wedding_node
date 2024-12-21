@@ -671,3 +671,28 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.billboard = catchAsync(async(req,res)=>{
+  const { id } = req.params;
+  const { category , billboard } = req.body;
+
+  const Model = models[category];
+  if (!Model) {
+    return next(new AppError(`No model found for category: ${category}`, 400));
+  }
+
+  const entity = await Model.findById(id);
+  if (!entity) {
+    return next(
+      new AppError(`No ${category.toLowerCase()} found with that ID`, 404)
+    );
+  }
+  
+  entity.billboard = billboard;
+  await entity.save();
+
+  return res.status(200).json({
+    success: true,
+    message: 'Billboard updated successfully'
+  });
+
+})
