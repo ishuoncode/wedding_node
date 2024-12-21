@@ -64,7 +64,7 @@ const importantInfoSchema = new mongoose.Schema({
   },
   bank: {
     type: bankSchema,
-    required: true,
+    // required: true,
   },
 });
 

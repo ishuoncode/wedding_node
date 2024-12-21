@@ -675,8 +675,6 @@ exports.billboard = catchAsync(async(req,res)=>{
   const { id } = req.params;
   const { category , billboard, deleteBillboard } = req.body;
 
-
-   
   const Model = models[category];
   if (!Model) {
     return next(new AppError(`No model found for category: ${category}`, 400));
