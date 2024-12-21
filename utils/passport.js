@@ -15,12 +15,17 @@ const passportUtil = app => {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://wedding-node.vercel.app/api'
+  : process.env.API_BASE_URL || 'http://localhost:8000/api'
+
+
   passport.use(
     new OAuth2Strategy(
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.BACKEND_URL}/auth/google/callback`,
+        callbackURL: `${API_BASE_URL}/auth/google/callback`,
         scope: ["profile", "email"], // You can add more scopes here as needed
       },
       async (accessToken, refreshToken, profile, done) => {
