@@ -9,7 +9,7 @@ const photographerSchema = new Schema({
     required: [true, "Name is required!"],
     maxlength: 40,
   },
-  billboard:String,
+  billboard:[String],
   rating: {
     type: Number,
     default: 4.5,
@@ -52,10 +52,10 @@ const photographerSchema = new Schema({
   yearOfEstd: Number,
   services: [String],
   reviews: [Review.schema], // Using Review schema as a sub-document
-  billboard: {
-    type: String,
-    maxlength: 255,
-  },
+  // billboard: {
+  //   type: String,
+  //   maxlength: 255,
+  // },
   occasion: {
     type: String,
     required: true,

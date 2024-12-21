@@ -673,8 +673,10 @@ exports.getGlobalSearch = catchAsync(async (req, res, next) => {
 
 exports.billboard = catchAsync(async(req,res)=>{
   const { id } = req.params;
-  const { category , billboard } = req.body;
+  const { category , billboard, deleteBillboard } = req.body;
 
+
+   
   const Model = models[category];
   if (!Model) {
     return next(new AppError(`No model found for category: ${category}`, 400));
@@ -687,7 +689,21 @@ exports.billboard = catchAsync(async(req,res)=>{
     );
   }
   
-  entity.billboard = billboard;
+  if (!Array.isArray(entity.billboard)) {
+    entity.billboard = [];
+  }
+
+
+  if (deleteBillboard && Array.isArray(deleteBillboard) && deleteBillboard.length > 0) {
+    entity.billboard = entity.billboard.filter(item => !deleteBillboard.includes(item));
+  }
+
+  if (billboard && Array.isArray(billboard) && billboard.length > 0) {
+    entity.billboard = entity.billboard.concat(billboard);
+  }
+
+
+  
   await entity.save();
 
   return res.status(200).json({

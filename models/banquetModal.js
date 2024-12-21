@@ -9,7 +9,7 @@ const banquetSchema = new Schema({
       maxlength: 255,
     },
   ],
-  billboard:String,
+  billboard:[String],
   name: {
     type: String,
     lowercase: true,
@@ -108,10 +108,10 @@ const banquetSchema = new Schema({
     default: "AC",
   },
   reviews: [Review.schema],
-  billboard: {
-    type: String,
-    maxlength: 255,
-  },
+  // billboard: {
+  //   type: String,
+  //   maxlength: 255,
+  // },
   openHours: {
     type: String,
     required: [true, "Open hours are required!"],

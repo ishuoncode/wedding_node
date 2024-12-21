@@ -40,7 +40,7 @@ const catererSchema = new Schema({
     required: [true, "Name is required!"],
     maxlength: 40,
   },
-  billboard:String,
+  billboard:[String],
   description: String,
   rating: {
     type: Number,
@@ -72,10 +72,10 @@ const catererSchema = new Schema({
       type: String,
     },
   yearOfEstd: Number,
-  billboard: {
-    type: String,
-    maxlength: 255,
-  },
+  // billboard: {
+  //   type: String,
+  //   maxlength: 255,
+  // },
   // photos: {
   //   type: [String],
   //   default: [],
