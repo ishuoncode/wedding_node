@@ -12,4 +12,12 @@ router
     adminController.transferOwnership
   );
 
+  router
+  .route("/ownership/transfer/all")
+  .patch(
+    authController.protect,
+    authController.restrictTo("admin"),
+    adminController.transferAllOwnership
+  );
+
 module.exports = router;

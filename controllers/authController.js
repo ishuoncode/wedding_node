@@ -54,10 +54,10 @@ exports.login = catchAsync(async (req, res, next) => {
 });
 
 exports.signup = catchAsync(async (req, res, next) => {
-    console.log(req.body,"req.body")
+    
   const { email, password, name ,phoneNumber} = req.body;
 
-  console.log(req.body, 'dffsdfs');
+
 
   const user = await User.create({
     name,
@@ -142,11 +142,15 @@ exports.protect = catchAsync(async (req, res, next) => {
     token = req.headers.authorization;
   }
 
+ 
+
   if (!token) {
     return next(
       new AppError('You are not logged in! Please log in to get access', 401)
     );
   }
+
+
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
@@ -169,7 +173,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
 exports.isLoggedIn = async (req, res, next) => {
   try {
-    // console.log(req.headers,"headers")
+   
     const token = req.headers.authorization.replace('Bearer ', '');
     if (!token) {
       return res.status(401).json({
