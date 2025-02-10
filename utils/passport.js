@@ -15,9 +15,9 @@ const passportUtil = app => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://wedding-node.vercel.app/api'
-  : process.env.API_BASE_URL || 'http://localhost:8000/api'
+  // const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  // ? 'https://wedding-node.vercel.app/api'
+  // : process.env.API_BASE_URL || 'http://localhost:8000/api'
 
 
   passport.use(
@@ -25,7 +25,7 @@ const passportUtil = app => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${API_BASE_URL}/auth/google/callback`,
+        callbackURL: `${process.env.REDIRECT_URL}`,
         scope: ["profile", "email"], // You can add more scopes here as needed
       },
       async (accessToken, refreshToken, profile, done) => {
