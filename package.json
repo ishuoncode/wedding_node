@@ -34,5 +34,15 @@
     "passport-google-oauth20": "^2.0.0",
     "pug": "^3.0.3",
     "xss-clean": "^0.1.4"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "argon2",
+      "aws-sdk"
+    ],
+    "onlyBuiltDependencies": [
+      "argon2",
+      "aws-sdk"
+    ]
   }
 }
