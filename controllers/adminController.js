@@ -2,7 +2,7 @@
 // const Decorator = require('../models/decoratorModal');
 // const Caterer = require('../models/catererModal');
 // const Photographer = require('../models/photographerModal');
-// const AppError = require("../utils/appError");
+// const AppError = require("../utils/appError");//
 const User = require('../models/userModal');
 const catchAsync = require('./../utils/catchAsync');
 
