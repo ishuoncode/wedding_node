@@ -31,7 +31,8 @@ const globalErrorHandler = require('./controllers/errorController');
 // Create an instance of an Express application
 const app = express();
 
-// app.set('view engine', 'ejs');
+// "" app.set('view engine', 'ejs');
+// console.log("hello")
 app.set('views', path.join(__dirname, 'public'));
 
 if (process.env.NODE_ENV === 'development') {
@@ -67,13 +68,15 @@ app.use('/api/caterer', CatererRoutes);
 app.use('/api/adminRating', AdminRatingRoutes);
 app.use('/api/appointment', AppointmentRoutes);
 app.use('/api/admin',AdminRoutes);
-app.use(`/api/bookmybaratpackage`, BookMyBaratPackage);
+app.use('/api/bookmybaratpackage', BookMyBaratPackage);
 
 
 app.all('*', (req, res, next) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-  });
-  
-  app.use(globalErrorHandler);
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+
+
+app.use(globalErrorHandler);
 
 module.exports = app;
