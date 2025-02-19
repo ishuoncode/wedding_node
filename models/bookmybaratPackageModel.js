@@ -21,6 +21,10 @@ const PackageSchema = new Schema({
       required: true,
     },
   ],
+  popular: {
+    type:Boolean,
+    
+  },
   addons: [
     {
       name: {
