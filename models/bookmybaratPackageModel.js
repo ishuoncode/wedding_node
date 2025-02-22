@@ -25,6 +25,7 @@ const PackageSchema = new Schema({
     type:Boolean,
     
   },
+  gallery:[{type:String}],
   addons: [
     {
       name: {

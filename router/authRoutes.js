@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');  // Import JWT for signing the token
 const router = express.Router();
 
 // Google OAuth2 callback route
-router.get("/google/callback", passport.authenticate('google'), (req, res) => {
+router.get(`${process.env.REDIRECT_URL}`, passport.authenticate('google'), (req, res) => {
     // If no user is authenticated, redirect to login
     if (!req.user) {
         return res.redirect(`${process.env.FRONTEND_URL}/login`);

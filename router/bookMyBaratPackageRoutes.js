@@ -1,5 +1,5 @@
 const express = require("express");
-const packageController = require("../controllers/bookmybaratpackageController");
+const baratController = require("../controllers/bookmybaratpackageController");
 const authController = require("../controllers/authController");
 
 const router = express.Router();
@@ -7,13 +7,13 @@ const router = express.Router();
 // Routes for managing packages
 router
   .route("/")
-  .post(authController.protect, authController.restrictTo("admin"), packageController.createPackage)
-  .get(packageController.getAllPackages);
+  .post(authController.protect, authController.restrictTo("admin"), baratController.createPackage)
+  .get(baratController.getAllPackages);
 
 router
   .route("/:id")
-  .get(packageController.getPackageById) // Get a single package by ID
-  .patch(authController.protect,authController.restrictTo("admin"), packageController.updatePackage) 
-  .delete(authController.protect,authController.restrictTo("admin"), packageController.deletePackage);
+  .get(baratController.getPackageById) // Get a single package by ID
+  .patch(authController.protect,authController.restrictTo("admin"), baratController.updatePackage) 
+  .delete(authController.protect,authController.restrictTo("admin"), baratController.deletePackage);
 
 module.exports = router;

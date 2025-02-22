@@ -1,36 +1,40 @@
 const BookMyBaratPackage = require("../models/bookmybaratPackageModel");
+const catchAsync = require("../utils/catchAsync");
+// const { uploadMultipleFiles } = require("./awsController");
 
-// Create a new package
-exports.createPackage = async (req, res) => {
-  try {
-    let packages;
-    if (Array.isArray(req.body)) {
-      // If the input is an array, create multiple packages
-      packages = await BookMyBaratPackage.insertMany(req.body, {
-        ordered: false,
-      });
-    } else {
-      // If it's a single object, create one package
-      const newPackage = new BookMyBaratPackage(req.body);
-      packages = [await newPackage.save()];
+
+exports.createPackage = catchAsync(async (req, res) => {
+
+    const {name,description,basePrice,inclusions,addons} = req.body
+
+    if (!name || !basePrice || !inclusions || !addons) {
+      return res.status(400).json({ message: "All required fields must be provided" });
     }
+      
+    const response = await BookMyBaratPackage.create({name,description,basePrice,inclusions,addons});
+
+    // if(response && Array.isArray(gallery) && gallery.length>0){
+    //   const category = "BaratPackage"
+    //   const files = req.files["gallery[]"].map((file) => ({
+    //     filename: `${category.toLowerCase()}-${response._id}-${file.originalname}`, // Dynamically generate filename
+    //     buffer: file.buffer, // Buffer data
+    //     ContentType: file.mimetype, // Content type
+    //   }));
+
+      const photoUrls = await uploadMultipleFiles(
+        files,
+        `dream-wedding/images/${category.toLowerCase()}/media/${id}`
+      );
+    //   response.gallery=photoUrls
+    // }
+    // await  response.save()
+     
     res.status(201).json({
       message: "success",
-      length: packages.length,
-      data: packages,
+      data: response,
     });
-  } catch (error) {
-    if (error.code === 11000) {
-      // Handle duplicate key error
-      res.status(400).json({
-        message:
-          "Duplicate package name(s) found. Some packages may not have been created.",
-      });
-    } else {
-      res.status(400).json({ message: error.message });
-    }
-  }
-};
+  } 
+);
 
 // Get all packages
 exports.getAllPackages = async (req, res) => {
