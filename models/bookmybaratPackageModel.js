@@ -26,6 +26,9 @@ const PackageSchema = new Schema({
     
   },
   gallery:[{type:String}],
+  visibleOnTop:[{type:String}],
+  videos:[{type:String}],
+  visibleVideos:[{type:String}],
   addons: [
     {
       name: {
