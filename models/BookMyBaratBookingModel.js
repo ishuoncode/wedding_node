@@ -23,8 +23,7 @@ const AddressSchema = new Schema({
 
 const BookingSchema = new Schema({
   package: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Package",
+    type: String,
     required: true
   },
   customerName: {

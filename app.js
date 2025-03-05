@@ -24,6 +24,7 @@ const AdminRatingRoutes = require('./router/adminRatingRoutes');
 const AppointmentRoutes = require('./router/appointmentRoutes');
 const AdminRoutes = require('./router/adminRoutes');
 const BookMyBaratPackage = require('./router/bookMyBaratPackageRoutes');
+const BookMyBaratBooking = require('./router/bookmybaratBookingRoutes')
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -69,6 +70,7 @@ app.use('/api/adminRating', AdminRatingRoutes);
 app.use('/api/appointment', AppointmentRoutes);
 app.use('/api/admin',AdminRoutes);
 app.use('/api/bookmybaratpackage', BookMyBaratPackage);
+app.use('/api/BookMyBaratBooking', BookMyBaratBooking);
 
 
 app.all('*', (req, res, next) => {
