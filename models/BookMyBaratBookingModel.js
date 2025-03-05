@@ -26,6 +26,11 @@ const BookingSchema = new Schema({
     type: String,
     required: true
   },
+  status: {
+    type: String,
+    enum: ["pending", "completed"],
+    default: "pending",
+  },
   customerName: {
     type: String,
     required: true,

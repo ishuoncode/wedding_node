@@ -16,4 +16,11 @@ router
     );
     
 
+    router.route("/updatebooking/:id").patch(
+        authController.protect,
+        authController.restrictTo("admin"),
+        BookingController.updateBooking
+    )
+
+
     module.exports = router;
