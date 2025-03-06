@@ -25,7 +25,7 @@ const passportUtil = app => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: `${API_BASE_URL}/auth/google/callback`,
+        callbackURL: `${process.env.REDIRECT_URL}`,
         scope: ["profile", "email"], // You can add more scopes here as needed
       },
       async (accessToken, refreshToken, profile, done) => {
